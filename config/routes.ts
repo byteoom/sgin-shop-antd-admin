@@ -35,8 +35,18 @@ export default [
       hideInMenu: true,
       icon: 'user',
     },
-  
-
+    {
+      name: '商品管理',
+      path: '/product',
+      icon: 'shopping',
+      routes: [
+        {
+          name: '商品分类',
+          path: '/product/category',
+          component: './ProductCategory',
+        },
+      ],
+    },
     {
       name: '系统管理',
       path: '/system',
@@ -106,6 +116,11 @@ export default [
           hideInMenu: true,
           path: '/system/permission/menu/:permissionId',
           component: './Sys/Permission/BindMenu',
+        },
+        {
+          name: '资源管理',
+          path: '/system/resource',
+          component: './Sys/Resource',
         },
       ],
     },
