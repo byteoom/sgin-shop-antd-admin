@@ -45,6 +45,11 @@ export default [
           path: '/product/category',
           component: './ProductCategory',
         },
+        {
+          name: '创建商品',
+          path: '/product/create',
+          component: './Product/Create',
+        }
       ],
     },
     {
