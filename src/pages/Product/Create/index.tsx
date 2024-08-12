@@ -1,3 +1,5 @@
+import { addProduct } from '@/services/product/product';
+import { createResource } from '@/services/sys/resource';
 import { PlusOutlined } from '@ant-design/icons';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
 import {
@@ -8,14 +10,14 @@ import {
   Input,
   Radio,
   Select,
-  Switch,
   Typography,
   Upload,
+  message,
 } from 'antd';
 import { useState } from 'react';
+import ProductManagement from './ProductManagement'; // Import the ProductManagement component
 import ProductVariant from './ProductVariant'; // Import your ProductVariant component
 import VariantInformation from './VariantInformation'; // Import the VariantInformation component
-import ProductManagement from './ProductManagement'; // Import the ProductManagement component
 
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
@@ -35,12 +37,108 @@ const ProductForm = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [variants, setVariants] = useState([]);
-
-  // 变体详情信息
   const [variantInfo, setVariantInfo] = useState([]);
+  const [form] = Form.useForm();
 
-  const handleUpload = () => {
-    // Handle file upload logic here
+  const handleUpload = async () => {
+    const uploadedFiles = [];
+    const formData = new FormData();
+
+    if (fileList.length === 0) {
+      message.error('请上传产品图片');
+      return [];
+    }
+
+    // 将所有文件添加到 FormData 对象中
+    for (let file of fileList) {
+      formData.append('files', file.originFileObj); // 直接将文件添加到 FormData
+    }
+
+    // 调用 API 上传文件并获取资源 ID 列表
+    try {
+      const resource = await createResource(formData); // 假设 createResource 接收 FormData 对象
+
+      if (resource && Array.isArray(resource.data)) {
+        resource.data.forEach((res) => {
+          if (res.uuid) {
+            uploadedFiles.push(res.uuid);
+          } else {
+            message.error(`上传文件失败，资源 ID 缺失`);
+          }
+        });
+      } else {
+        message.error(`上传文件失败`);
+        return [];
+      }
+    } catch (error) {
+      message.error(`文件上传过程中出现错误`);
+      return [];
+    }
+
+    return uploadedFiles;
+  };
+
+  const transformVariants = (variants, variantInfo) => {
+    return variants.map((variant) => ({
+      Name: variant.name, // 产品变体名称
+      Description: `${variant.name} description`, // 这里假设描述是根据名称生成的
+      Options: variant.options.map((option) => {
+        // 从 variantInfo 中提取对应的选项信息
+        const matchedInfo = variantInfo.find((info) => info[variant.name.toLowerCase()] === option);
+  
+        return {
+          Name: option, // 产品变体Option名称
+          Unit: '个', // 默认单位
+          Description: `${option} description`, // 这里假设描述是根据选项名称生成的
+          Price: matchedInfo ? matchedInfo.price : 0, // 从 matchedInfo 中提取价格
+          Discount: matchedInfo ? matchedInfo.discount : 0, // 从 matchedInfo 中提取折扣
+          DiscountPrice: matchedInfo ? matchedInfo.discountPrice : 0, // 从 matchedInfo 中提取折扣价
+          Stock: matchedInfo ? matchedInfo.stock : 0, // 从 matchedInfo 中提取库存
+        };
+      }),
+    }));
+  };
+  
+
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+
+    
+
+      const uploadedFileIds = await handleUpload();
+
+      if (uploadedFileIds.length === 0) {
+        return;
+      }
+
+      // 转换 variants 为所需格式，同时整合 variantInfo 中的数据
+    const transformedVariants = transformVariants(variants, variantInfo);
+
+    console.log('transformedVariants:', transformedVariants);
+
+      // 整合产品数据
+      const productData = {
+        ...values,
+        images: uploadedFileIds, // 上传的图片资源 ID
+        variants: variantInfo, // 变体信息
+      };
+
+      console.log('productData:', productData);
+      console.log("variants:", variants);
+      console.log('variantInfo:', variantInfo);
+
+      const result = await addProduct(productData);
+
+      if (result?.success) {
+        message.success('产品创建成功！');
+      } else {
+        message.error('产品创建失败！');
+      }
+    } catch (error) {
+      message.error('提交表单失败，请检查输入并重试。');
+    }
   };
 
   const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) =>
@@ -75,18 +173,22 @@ const ProductForm = () => {
           showIcon
           style={{ marginBottom: '20px' }}
         />
-        <Form layout="vertical">
+        <Form form={form} layout="vertical">
           <Form.Item
+            name="name"
             label="产品名称"
             required
             tooltip="输入您产品的唯一名称。使其描述性强且易于客户记忆。"
+            rules={[{ required: true, message: '请输入产品名称' }]}
           >
             <Input placeholder="产品名称" maxLength={70} />
           </Form.Item>
 
           <Form.Item
+            name="category"
             label="分类"
             tooltip="选择最能代表您产品的主要类别。这有助于客户更容易找到您的产品。"
+            rules={[{ required: false, message: '请选择分类' }]}
           >
             <Select placeholder="选择分类">
               <Option value="jewelry">珠宝</Option>
@@ -97,12 +199,13 @@ const ProductForm = () => {
       </div>
       {/* 上传产品部分 */}
       <div style={{ marginBottom: '20px' }}>
-        <Typography.Title level={5}>上传产品</Typography.Title>
+        <Typography.Title level={5}>上传产品图片</Typography.Title>
         <Form layout="vertical">
           <Form.Item
             label="产品照片"
             required
             tooltip="高质量的图片可以显著提升产品的吸引力。上传清晰、光线良好的照片，展示您的产品从不同角度的外观。"
+            rules={[{ required: true, message: '请上传产品照片' }]}
           >
             <Upload
               listType="picture-card"
@@ -129,8 +232,9 @@ const ProductForm = () => {
       {/* 产品详细信息部分 */}
       <div style={{ marginBottom: '20px' }}>
         <Typography.Title level={5}>产品详细信息</Typography.Title>
-        <Form layout="vertical">
+        <Form layout="vertical" form={form}>
           <Form.Item
+            name="status"
             label="产品状态"
             tooltip="准确选择您产品的状态，以设定清晰的客户期望。"
           >
@@ -141,17 +245,20 @@ const ProductForm = () => {
           </Form.Item>
 
           <Form.Item
+            name="description"
             label="产品描述"
             required
             tooltip="编写全面的描述，突出产品的独特特征、优点和规格。"
+            rules={[{ required: true, message: '请输入产品描述' }]}
           >
             <TextArea rows={4} placeholder="输入产品描述" maxLength={2000} />
           </Form.Item>
 
           <Form.Item
+            name="videoUrl"
             label="产品视频"
-            required
             tooltip="添加展示您产品操作的视频。"
+            rules={[{ required: false, message: '请添加视频 URL' }]}
           >
             <Button icon={<PlusOutlined />}>添加视频URL</Button>
           </Form.Item>
@@ -166,12 +273,12 @@ const ProductForm = () => {
         setVariantInfo={setVariantInfo}
       />
       {/* 产品管理部分 */}
-      <ProductManagement /> {/* Add the ProductManagement component here */}
+      <ProductManagement form={form} /> {/* Add the ProductManagement component here */}
       {/* 运输部分 */}
       <div style={{ marginBottom: '20px' }}>
         <Typography.Title level={5}>运输</Typography.Title>
-        <Form layout="vertical">
-          <Form.Item label="产品重量" required>
+        <Form layout="vertical" form={form}>
+          <Form.Item name="weight" label="产品重量" required>
             <Input placeholder="克 (g)" />
           </Form.Item>
 
@@ -182,16 +289,18 @@ const ProductForm = () => {
             style={{ marginBottom: '20px' }}
           />
 
-          <Form.Item label="产品尺寸" required>
+          <Form.Item name="dimensions" label="产品尺寸" required>
             <Input.Group compact>
               <Input style={{ width: '33%' }} placeholder="宽度 (厘米)" />
               <Input style={{ width: '33%' }} placeholder="高度 (厘米)" />
               <Input style={{ width: '33%' }} placeholder="长度 (厘米)" />
             </Input.Group>
           </Form.Item>
-
         </Form>
       </div>
+      <Button type="primary" onClick={handleSubmit}>
+        创建产品
+      </Button>
     </div>
   );
 };
