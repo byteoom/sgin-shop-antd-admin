@@ -78,34 +78,71 @@ const ProductForm = () => {
     return uploadedFiles;
   };
 
-  const transformVariants = (variants, variantInfo) => {
-    return variants.map((variant) => ({
-      Name: variant.name, // 产品变体名称
-      Description: `${variant.name} description`, // 这里假设描述是根据名称生成的
-      Options: variant.options.map((option) => {
-        // 从 variantInfo 中提取对应的选项信息
-        const matchedInfo = variantInfo.find((info) => info[variant.name.toLowerCase()] === option);
-  
-        return {
-          Name: option, // 产品变体Option名称
-          Unit: '个', // 默认单位
-          Description: `${option} description`, // 这里假设描述是根据选项名称生成的
-          Price: matchedInfo ? matchedInfo.price : 0, // 从 matchedInfo 中提取价格
-          Discount: matchedInfo ? matchedInfo.discount : 0, // 从 matchedInfo 中提取折扣
-          DiscountPrice: matchedInfo ? matchedInfo.discountPrice : 0, // 从 matchedInfo 中提取折扣价
-          Stock: matchedInfo ? matchedInfo.stock : 0, // 从 matchedInfo 中提取库存
-        };
-      }),
-    }));
-  };
-  
 
+  const transformVariantsRecursiveChild = (variants, variantInfo, level = 0) => {
+
+    if (level >= variants.length) {
+      return [];
+    }
+
+    const currentVariant = variants[level];
+
+    // 获取当前变体所有的选项
+    const currentOptions = currentVariant.options;
+
+    // 循环当前变体的所有选项
+    let rlist = [];
+    for (let option of currentOptions) {
+      const newVariantInfos = variantInfo.filter((info) => {
+        if (info[currentVariant.name] === option) {
+          return true;
+        }
+      });
+
+      const children = transformVariantsRecursiveChild(
+        variants,
+        newVariantInfos,
+        level + 1,
+      );
+      let item = {
+        name: currentVariant.name,
+        children: children,
+      };
+
+      if (newVariantInfos.length === 1) {
+        item.name = option;
+        item.price = parseFloat(newVariantInfos[0].price);
+        item.stock = parseFloat(newVariantInfos[0].stock);
+      }
+      rlist.push(item);
+    }
+    return rlist;
+  }
+
+
+
+  const transformVariantsRecursive = (variants, variantInfo, level = 0, acc = []) => {
+    if (level >= variants.length) {
+      return acc;
+    }
+
+    const currentVariant = variants[level];
+
+    // 获取当前变体所有的选项
+    const currentOptions = currentVariant.options;
+
+    currentVariant.children = transformVariantsRecursiveChild(variants, variantInfo, level);
+
+    acc.push(currentVariant);
+
+   
+
+    return transformVariantsRecursive(variants, variantInfo, level + 1, acc);
+  };
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-
-    
 
       const uploadedFileIds = await handleUpload();
 
@@ -114,24 +151,36 @@ const ProductForm = () => {
       }
 
       // 转换 variants 为所需格式，同时整合 variantInfo 中的数据
-    const transformedVariants = transformVariants(variants, variantInfo);
+      // const transformedVariants = transformVariantsRecursive(
+      //   variants,
+      //   variantInfo,
+      // );
 
-    console.log('transformedVariants:', transformedVariants);
+      // console.log('transformedVariants:', transformedVariants);
+
+      values.product_status = values.product_status ? '上架' : '下架';
+      values.weight = parseFloat(values.weight);
+      values.length = parseFloat(values.length);
+      values.width = parseFloat(values.width);
+      values.height = parseFloat(values.height);
+      values.stock_warning = parseInt(values.stock_warning);
+    
 
       // 整合产品数据
       const productData = {
         ...values,
         images: uploadedFileIds, // 上传的图片资源 ID
-        variants: variantInfo, // 变体信息
+        variants: variants, // 变体信息
+        variants_vals: variantInfo, // 变体值信息
       };
 
       console.log('productData:', productData);
-      console.log("variants:", variants);
+      console.log('variants:', variants);
       console.log('variantInfo:', variantInfo);
 
       const result = await addProduct(productData);
 
-      if (result?.success) {
+      if (result.code == 200) {
         message.success('产品创建成功！');
       } else {
         message.error('产品创建失败！');
@@ -273,7 +322,8 @@ const ProductForm = () => {
         setVariantInfo={setVariantInfo}
       />
       {/* 产品管理部分 */}
-      <ProductManagement form={form} /> {/* Add the ProductManagement component here */}
+      <ProductManagement form={form} />{' '}
+      {/* Add the ProductManagement component here */}
       {/* 运输部分 */}
       <div style={{ marginBottom: '20px' }}>
         <Typography.Title level={5}>运输</Typography.Title>
@@ -289,11 +339,17 @@ const ProductForm = () => {
             style={{ marginBottom: '20px' }}
           />
 
-          <Form.Item name="dimensions" label="产品尺寸" required>
+          <Form.Item label="产品尺寸" required>
             <Input.Group compact>
-              <Input style={{ width: '33%' }} placeholder="宽度 (厘米)" />
-              <Input style={{ width: '33%' }} placeholder="高度 (厘米)" />
-              <Input style={{ width: '33%' }} placeholder="长度 (厘米)" />
+              <Form.Item name="length">
+                <Input placeholder="宽度 (厘米)" />
+              </Form.Item>
+              <Form.Item name="width">
+                <Input placeholder="高度 (厘米)" />
+              </Form.Item>
+              <Form.Item name="height">
+                <Input placeholder="长度 (厘米)" />
+              </Form.Item>
             </Input.Group>
           </Form.Item>
         </Form>

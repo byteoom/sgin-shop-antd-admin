@@ -6,17 +6,19 @@ const ProductManagement = ({ form }) => {
       <Typography.Title level={5}>产品管理</Typography.Title>
       <Form form={form} layout="vertical">
         <Form.Item
-          name="productStatus"
+          name="product_status"
           label="产品上架状态"
           valuePropName="checked"
+          initialValue={false}
           required
         >
           <Switch checkedChildren="上架" unCheckedChildren="未上架" />
         </Form.Item>
         
         <Form.Item
-          name="allowSaleBelowAlert"
+          name="stock_warning_sell"
           label="低于警戒库存是否售卖"
+          initialValue={false}
           valuePropName="checked"
           required
         >
@@ -24,7 +26,7 @@ const ProductManagement = ({ form }) => {
         </Form.Item>
 
         <Form.Item
-          name="alertStock"
+          name="stock_warning"
           label="产品警戒库存"
           required
           rules={[{ required: true, message: '请输入产品警戒库存' }]}
@@ -33,7 +35,7 @@ const ProductManagement = ({ form }) => {
         </Form.Item>
         
         <Form.Item
-          name="sku"
+          name="unit"
           label="库存管理单位"
           required
           rules={[{ required: true, message: '请输入库存管理单位' }]}
