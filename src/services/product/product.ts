@@ -52,3 +52,19 @@ export async function deleteProductItem(data) {
     data,
   });
 }
+
+// getProductItem
+export async function getProductItem(data) {
+  return request('/api/v1/product/item/info', {
+    method: 'POST',
+    data,
+  });
+}
+
+// updateProductItem
+export async function updateProductItem(data) {
+  return request('/api/v1/product/item/update', {
+    method: 'POST',
+    data,
+  });
+}

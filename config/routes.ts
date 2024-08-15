@@ -60,6 +60,12 @@ export default [
           name: '商品SKU',
           path: '/product/sku',
           component: './Product/Manager/ProductItem',
+        },
+        {
+          name: '编辑SKU',
+          path: '/product/sku/edit/:uuid',
+          component: './Product/Edit/EditProductItem',
+          hideInMenu: true,
         }
       ],
     },

@@ -67,6 +67,10 @@ const SkuManagement = () => {
     setPreviewImage(url);
   };
 
+  const handleEditSku = (record) => {
+    history.push(`/product/sku/edit/${record.uuid}`);
+  };
+
   const columns = [
     {
       title: '产品图片',
