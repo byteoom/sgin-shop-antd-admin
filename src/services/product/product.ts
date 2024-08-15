@@ -7,3 +7,48 @@ export async function addProduct(data) {
     data,
   });
 }
+
+
+export async function getProducts(query) {
+  return request('/api/v1/product/list', {
+    method: 'POST',
+    data: query,
+  });
+}
+
+
+export async function updateProduct(data) {
+  return request('/api/v1/product/update', {
+    method: 'POST',
+    data,
+  });
+}
+
+export async function deleteProduct(data) {
+  return request('/api/v1/product/delete', {
+    method: 'POST',
+    data,
+  });
+}
+
+export async function getProduct(data) {
+  return request('/api/v1/product/info', {
+    method: 'POST',
+    data,
+  });
+}
+
+
+export async function getProductItems(data) {
+  return request('/api/v1/product/item/list', {
+    method: 'POST',
+    data,
+  });
+}
+
+export async function deleteProductItem(data) {
+  return request('/api/v1/product/item/delete', {
+    method: 'POST',
+    data,
+  });
+}

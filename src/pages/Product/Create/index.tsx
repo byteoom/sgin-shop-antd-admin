@@ -15,6 +15,7 @@ import {
   message,
 } from 'antd';
 import { useState } from 'react';
+import { history } from '@umijs/max';
 import ProductManagement from './ProductManagement'; // Import the ProductManagement component
 import ProductVariant from './ProductVariant'; // Import your ProductVariant component
 import VariantInformation from './VariantInformation'; // Import the VariantInformation component
@@ -53,6 +54,7 @@ const ProductForm = () => {
     for (let file of fileList) {
       formData.append('files', file.originFileObj); // 直接将文件添加到 FormData
     }
+    formData.append('path', '/'); // 上传到 product 文件夹
 
     // 调用 API 上传文件并获取资源 ID 列表
     try {
@@ -182,6 +184,7 @@ const ProductForm = () => {
 
       if (result.code == 200) {
         message.success('产品创建成功！');
+        history.push('/product/manager');
       } else {
         message.error('产品创建失败！');
       }

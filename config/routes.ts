@@ -49,6 +49,17 @@ export default [
           name: '创建商品',
           path: '/product/create',
           component: './Product/Create',
+          hideInMenu: true,
+        },
+        {
+          name: '商品管理',
+          path: '/product/manager',
+          component: './Product/Manager/ProductManagement',
+        },
+        {
+          name: '商品SKU',
+          path: '/product/sku',
+          component: './Product/Manager/ProductItem',
         }
       ],
     },
