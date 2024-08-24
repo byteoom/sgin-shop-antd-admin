@@ -70,6 +70,18 @@ export default [
       ],
     },
     {
+      name: '订单',
+      path: '/order',
+      icon: 'shopping',
+      routes: [
+        {
+          name: '订单管理',
+          path: '/order/manager',
+          component: './Order/Manager/OrderManager',
+        },
+      ],
+    },
+    {
       name: '系统管理',
       path: '/system',
       icon: 'setting',

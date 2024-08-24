@@ -11,6 +11,7 @@ import {
   Modal,
   Select,
   Upload,
+  Typography,
 } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
@@ -87,6 +88,7 @@ const SkuEdit = () => {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const { uuid } = useParams();
+  const [editorData, setEditorData] = useState('');
 
   const fetchSkuDetails = async (uuid) => {
     try {
@@ -166,6 +168,7 @@ const SkuEdit = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <PageContainer>
+      <Typography.Title level={5}>产品信息</Typography.Title>
         <Form
           form={form}
           layout="vertical"
@@ -199,6 +202,7 @@ const SkuEdit = () => {
               ))}
             </div>
           </Form.Item>
+          <Typography.Title level={5}>产品详细信息</Typography.Title>
           <Form.Item
             name="description"
             label="产品描述"
@@ -206,6 +210,7 @@ const SkuEdit = () => {
           >
             <TextArea />
           </Form.Item>
+          <Typography.Title level={5}>产品价格与库存信息</Typography.Title>
           <Form.Item
             name="variants"
             label="SKU"
@@ -213,6 +218,7 @@ const SkuEdit = () => {
           >
             <Input disabled />
           </Form.Item>
+
           <Form.Item
             name="price"
             label="价格"
@@ -242,11 +248,25 @@ const SkuEdit = () => {
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item
+            name="unit"
+            label="库存单位"
+            rules={[{ required: true, message: '请选择产品单位' }]}
+          >
+            <Select>
+              <Option value="个">个</Option>
+              <Option value="件">件</Option>
+              <Option value="套">套</Option>
+              <Option value="箱">箱</Option>
+            </Select>
+          </Form.Item>
+          <Typography.Title level={5}>运输</Typography.Title>
+          <Form.Item
             name="weight"
             label="重量"
+           
             rules={[{ required: true, message: '请输入产品重量' }]}
           >
-            <InputNumber min={0} style={{ width: '100%' }} />
+            <InputNumber min={0} style={{ width: '100px' }} />
           </Form.Item>
           <Form.Item
             name="length"
@@ -269,18 +289,7 @@ const SkuEdit = () => {
           >
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item
-            name="unit"
-            label="单位"
-            rules={[{ required: true, message: '请选择产品单位' }]}
-          >
-            <Select>
-              <Option value="个">个</Option>
-              <Option value="件">件</Option>
-              <Option value="套">套</Option>
-              <Option value="箱">箱</Option>
-            </Select>
-          </Form.Item>
+         
 
           <Form.Item>
             <Button type="primary" onClick={handleUpdate} loading={loading}>
