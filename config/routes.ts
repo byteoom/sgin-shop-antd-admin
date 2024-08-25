@@ -172,6 +172,16 @@ export default [
           path: '/system/payment_method/paypal-test',
           component: './Sys/PaymentMethodManage/Paypal/TestPay',
         },
+        {
+          name: '站点配置',
+          path: '/system/site-config',
+          component: './Sys/SiteConfig',
+        },
+        {
+          name: '邮件配置',
+          path: '/system/mail-config',
+          component: './Sys/EmailConfig',
+        },
       ],
     },
     {
