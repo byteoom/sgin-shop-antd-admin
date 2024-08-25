@@ -235,6 +235,15 @@ const ProductForm = () => {
           >
             <Input placeholder="产品名称" maxLength={70} />
           </Form.Item>
+          <Form.Item
+            name="alias_name"
+            label="产品别名"
+            required
+            tooltip="输入您产品的别名。是名称的 URL 友好版本。它通常都是小写的，并且只包含字母、数字和连字符。"
+            rules={[{ required: true, message: '您产品的别名' }]}
+          >
+            <Input placeholder="产品的别名" maxLength={70} />
+          </Form.Item>
 
           <Form.Item
             name="category"

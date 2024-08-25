@@ -156,6 +156,22 @@ export default [
           path: '/system/resource',
           component: './Sys/Resource',
         },
+        {
+          name: '支付方式管理',
+          path: '/system/payment_method',
+          component: './Sys/PaymentMethodManage/PaymentMethod',
+        },
+        {
+          name: 'paypal配置',
+          path: '/system/payment_method/paypal',
+          component: './Sys/PaymentMethodManage/Paypal',
+          hideInMenu: true,
+        },
+        {
+          name: 'paypal支付测试',
+          path: '/system/payment_method/paypal-test',
+          component: './Sys/PaymentMethodManage/Paypal/TestPay',
+        },
       ],
     },
     {
