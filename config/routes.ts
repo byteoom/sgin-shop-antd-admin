@@ -182,6 +182,11 @@ export default [
           path: '/system/mail-config',
           component: './Sys/EmailConfig',
         },
+        {
+          name: '货币配置',
+          path: '/system/currency-config',
+          component: './Sys/CurrencyManagement',
+        },
       ],
     },
     {
