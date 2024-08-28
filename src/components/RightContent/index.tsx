@@ -57,7 +57,7 @@ import {
                 const { key } = event;
                 console.log(key);
                 if (key === 'center') {
-                  history.push('/user/profile');
+                  history.push('/profile');
                 }
   
                 if (key === 'logout') {
