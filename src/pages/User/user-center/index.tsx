@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
 import { Layout, Menu } from 'antd';
-import PersonalCenter from './PersonalCenter';
-import BasicSettings from './BasicSettings';
-import SecuritySettings from './SecuritySettings';
+import { useState } from 'react';
+import { BasicSettings, PersonalCenter, SecuritySettings } from './components';
 
 const { Sider, Content } = Layout;
 
@@ -39,7 +37,6 @@ const PersonalSettings = () => {
           {selectedMenuItem === '1' && <PersonalCenter />}
           {selectedMenuItem === '2' && <BasicSettings />}
           {selectedMenuItem === '3' && <SecuritySettings />}
-
         </Content>
       </Layout>
     </Layout>

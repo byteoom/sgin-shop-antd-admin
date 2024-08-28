@@ -1,6 +1,8 @@
 import { addProduct } from '@/services/product/product';
 import { createResource } from '@/services/sys/resource';
 import { PlusOutlined } from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-components';
+import { history } from '@umijs/max';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
 import {
   Alert,
@@ -15,14 +17,15 @@ import {
   message,
 } from 'antd';
 import { useState } from 'react';
-import { history } from '@umijs/max';
-import ProductManagement from './ProductManagement'; // Import the ProductManagement component
-import ProductVariant from './ProductVariant'; // Import your ProductVariant component
-import VariantInformation from './VariantInformation'; // Import the VariantInformation component
-import ProductTypeSelector from './ProductTypeSelector'; // Import the ProductTypeSelector component
-import SingleProductForm from './SingleProductForm'; // Import the SingleProductForm component
-import ShippingForm from './ShippingForm'; // Import the ShippingForm component
-import CurrencySelect from './CurrencySelect';
+import {
+  CurrencySelect,
+  ProductManagement,
+  ProductTypeSelector,
+  ProductVariant,
+  ShippingForm,
+  SingleProductForm,
+  VariantInformation,
+} from './components'; // Import the component
 
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
@@ -86,7 +89,6 @@ const ProductForm = () => {
     return uploadedFiles;
   };
 
-
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
@@ -96,7 +98,6 @@ const ProductForm = () => {
       if (uploadedFileIds.length === 0) {
         return;
       }
-
 
       values.product_status = values.product_status ? '上架' : '下架';
       values.weight = parseFloat(values.weight);
@@ -111,7 +112,7 @@ const ProductForm = () => {
         values.stock = parseInt(values.stock);
         values.variants = [];
         values.variants_vals = [];
-      }else {
+      } else {
         values.variants = variants;
         values.variants_vals = variantInfo;
       }
@@ -155,155 +156,162 @@ const ProductForm = () => {
   );
 
   return (
-    <div
-      style={{ padding: '20px', backgroundColor: '#fff', borderRadius: '8px' }}
-    >
-      {/* 产品信息部分 */}
-      <div style={{ marginBottom: '20px' }}>
-        <Typography.Title level={5}>产品信息</Typography.Title>
-        <Alert
-          message="避免销售假冒产品/侵犯知识产权，以防止您的产品被删除。"
-          type="warning"
-          showIcon
-          style={{ marginBottom: '20px' }}
-        />
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label="产品名称"
-            required
-            tooltip="输入您产品的唯一名称。使其描述性强且易于客户记忆。"
-            rules={[{ required: true, message: '请输入产品名称' }]}
-          >
-            <Input placeholder="产品名称" maxLength={70} />
-          </Form.Item>
-          <Form.Item
-            name="alias_name"
-            label="产品别名"
-            required
-            tooltip="输入您产品的别名。是名称的 URL 友好版本。它通常都是小写的，并且只包含字母、数字和连字符。"
-            rules={[{ required: true, message: '您产品的别名' }]}
-          >
-            <Input placeholder="产品的别名" maxLength={70} />
-          </Form.Item>
-
-          <Form.Item
-            name="category"
-            label="分类"
-            tooltip="选择最能代表您产品的主要类别。这有助于客户更容易找到您的产品。"
-            rules={[{ required: false, message: '请选择分类' }]}
-          >
-            <Select placeholder="选择分类">
-              <Option value="jewelry">珠宝</Option>
-              {/* 需要时添加更多选项 */}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="currency"
-            label="销售货币"
-            tooltip="选择您产品的销售货币。"
-            initialValue={selectedCurrency}
-            rules={[{ required: false, message: '请选择您产品的销售货币' }]}
-          >
-            <CurrencySelect value={selectedCurrency} onChange={setSelectedCurrency} />
-          </Form.Item>
-        </Form>
-      </div>
-      {/* 上传产品部分 */}
-      <div style={{ marginBottom: '20px' }}>
-        <Typography.Title level={5}>上传产品图片</Typography.Title>
-        <Form layout="vertical">
-          <Form.Item
-            label="产品照片"
-            required
-            tooltip="高质量的图片可以显著提升产品的吸引力。上传清晰、光线良好的照片，展示您的产品从不同角度的外观。"
-            rules={[{ required: true, message: '请上传产品照片' }]}
-          >
-            <Upload
-              listType="picture-card"
-              fileList={fileList}
-              onPreview={handlePreview}
-              onChange={handleChange}
+    <PageContainer>
+      <div
+        style={{
+          padding: '20px',
+          backgroundColor: '#fff',
+          borderRadius: '8px',
+        }}
+      >
+        {/* 产品信息部分 */}
+        <div style={{ marginBottom: '20px' }}>
+          <Typography.Title level={5}>产品信息</Typography.Title>
+          <Alert
+            message="避免销售假冒产品/侵犯知识产权，以防止您的产品被删除。"
+            type="warning"
+            showIcon
+            style={{ marginBottom: '20px' }}
+          />
+          <Form form={form} layout="vertical">
+            <Form.Item
+              name="name"
+              label="产品名称"
+              required
+              tooltip="输入您产品的唯一名称。使其描述性强且易于客户记忆。"
+              rules={[{ required: true, message: '请输入产品名称' }]}
             >
-              {uploadButton}
-            </Upload>
-            {previewImage && (
-              <Image
-                wrapperStyle={{ display: 'none' }}
-                preview={{
-                  visible: previewOpen,
-                  onVisibleChange: (visible) => setPreviewOpen(visible),
-                  afterOpenChange: (visible) => !visible && setPreviewImage(''),
-                }}
-                src={previewImage}
+              <Input placeholder="产品名称" maxLength={70} />
+            </Form.Item>
+            <Form.Item
+              name="alias_name"
+              label="产品别名"
+              required
+              tooltip="输入您产品的别名。是名称的 URL 友好版本。它通常都是小写的，并且只包含字母、数字和连字符。"
+              rules={[{ required: true, message: '您产品的别名' }]}
+            >
+              <Input placeholder="产品的别名" maxLength={70} />
+            </Form.Item>
+
+            <Form.Item
+              name="category"
+              label="分类"
+              tooltip="选择最能代表您产品的主要类别。这有助于客户更容易找到您的产品。"
+              rules={[{ required: false, message: '请选择分类' }]}
+            >
+              <Select placeholder="选择分类">
+                <Option value="jewelry">珠宝</Option>
+                {/* 需要时添加更多选项 */}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="currency"
+              label="销售货币"
+              tooltip="选择您产品的销售货币。"
+              initialValue={selectedCurrency}
+              rules={[{ required: false, message: '请选择您产品的销售货币' }]}
+            >
+              <CurrencySelect
+                value={selectedCurrency}
+                onChange={setSelectedCurrency}
               />
-            )}
-          </Form.Item>
-        </Form>
-      </div>
-      {/* 产品详细信息部分 */}
-      <div style={{ marginBottom: '20px' }}>
-        <Typography.Title level={5}>产品详细信息</Typography.Title>
-        <Form layout="vertical" form={form}>
-          <Form.Item
-            name="status"
-            label="产品状态"
-            tooltip="准确选择您产品的状态，以设定清晰的客户期望。"
-          >
-            <Radio.Group>
-              <Radio value="new">全新</Radio>
-              <Radio value="second">二手</Radio>
-            </Radio.Group>
-          </Form.Item>
+            </Form.Item>
+          </Form>
+        </div>
+        {/* 上传产品部分 */}
+        <div style={{ marginBottom: '20px' }}>
+          <Typography.Title level={5}>上传产品图片</Typography.Title>
+          <Form layout="vertical">
+            <Form.Item
+              label="产品照片"
+              required
+              tooltip="高质量的图片可以显著提升产品的吸引力。上传清晰、光线良好的照片，展示您的产品从不同角度的外观。"
+              rules={[{ required: true, message: '请上传产品照片' }]}
+            >
+              <Upload
+                listType="picture-card"
+                fileList={fileList}
+                onPreview={handlePreview}
+                onChange={handleChange}
+              >
+                {uploadButton}
+              </Upload>
+              {previewImage && (
+                <Image
+                  wrapperStyle={{ display: 'none' }}
+                  preview={{
+                    visible: previewOpen,
+                    onVisibleChange: (visible) => setPreviewOpen(visible),
+                    afterOpenChange: (visible) =>
+                      !visible && setPreviewImage(''),
+                  }}
+                  src={previewImage}
+                />
+              )}
+            </Form.Item>
+          </Form>
+        </div>
+        {/* 产品详细信息部分 */}
+        <div style={{ marginBottom: '20px' }}>
+          <Typography.Title level={5}>产品详细信息</Typography.Title>
+          <Form layout="vertical" form={form}>
+            <Form.Item
+              name="status"
+              label="产品状态"
+              tooltip="准确选择您产品的状态，以设定清晰的客户期望。"
+            >
+              <Radio.Group>
+                <Radio value="new">全新</Radio>
+                <Radio value="second">二手</Radio>
+              </Radio.Group>
+            </Form.Item>
 
-          <Form.Item
-            name="description"
-            label="产品描述"
-            tooltip="编写全面的描述，突出产品的独特特征、优点和规格。"
-            rules={[{ required: false, message: '请输入产品描述' }]}
-          >
-            <TextArea rows={4} placeholder="输入产品描述" maxLength={2000} />
-          </Form.Item>
+            <Form.Item
+              name="description"
+              label="产品描述"
+              tooltip="编写全面的描述，突出产品的独特特征、优点和规格。"
+              rules={[{ required: false, message: '请输入产品描述' }]}
+            >
+              <TextArea rows={4} placeholder="输入产品描述" maxLength={2000} />
+            </Form.Item>
 
-          <Form.Item
-            name="videoUrl"
-            label="产品视频"
-            tooltip="添加展示您产品操作的视频。"
-            rules={[{ required: false, message: '请添加视频 URL' }]}
-          >
-            <Button icon={<PlusOutlined />}>添加视频URL</Button>
-          </Form.Item>
-        </Form>
-      </div>
-      {/* 产品变体部分 */}
-
-      <ProductTypeSelector setProductType={setProductType} />
-
+            <Form.Item
+              name="videoUrl"
+              label="产品视频"
+              tooltip="添加展示您产品操作的视频。"
+              rules={[{ required: false, message: '请添加视频 URL' }]}
+            >
+              <Button icon={<PlusOutlined />}>添加视频URL</Button>
+            </Form.Item>
+          </Form>
+        </div>
+        {/* 产品变体部分 */}
+        <ProductTypeSelector setProductType={setProductType} />
         {/* 根据选择的产品类型渲染组件 */}
         {productType === 'single' ? (
-        <SingleProductForm form={form} />
-      ) : (
-        <>
-          {/* 产品变体部分 */}
-          <ProductVariant variants={variants} setVariants={setVariants} />
-          {/* 变体信息部分 */}
-          <VariantInformation
-            variants={variants}
-            variantInfo={variantInfo}
-            setVariantInfo={setVariantInfo}
-          />
-        </>
-      )}
-      <ProductManagement form={form} />{' '}
-      {/* 运输部分 */}
-      <div style={{ marginBottom: '20px' }}>
-       <ShippingForm form={form} />
+          <SingleProductForm form={form} />
+        ) : (
+          <>
+            {/* 产品变体部分 */}
+            <ProductVariant variants={variants} setVariants={setVariants} />
+            {/* 变体信息部分 */}
+            <VariantInformation
+              variants={variants}
+              variantInfo={variantInfo}
+              setVariantInfo={setVariantInfo}
+            />
+          </>
+        )}
+        <ProductManagement form={form} /> {/* 运输部分 */}
+        <div style={{ marginBottom: '20px' }}>
+          <ShippingForm form={form} />
+        </div>
+        <Button type="primary" onClick={handleSubmit}>
+          创建产品
+        </Button>
       </div>
-      <Button type="primary" onClick={handleSubmit}>
-        创建产品
-      </Button>
-    </div>
+    </PageContainer>
   );
 };
 
