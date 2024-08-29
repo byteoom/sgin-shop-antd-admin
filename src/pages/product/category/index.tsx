@@ -1,9 +1,6 @@
 import {
-  addProductCategory,
-  deleteProductCategory,
-  getAllProductCategories,
-  updateProductCategory,
-} from '@/services/product/product_category';
+  categoryServices
+} from '@/services';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import ProTable from '@ant-design/pro-table';
@@ -37,7 +34,7 @@ const ProductCategoryManagement = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await getAllProductCategories();
+      const response = await categoryServices.getAllProductCategories();
       setCategories(formatCategoryTree(response.data));
     } catch (error) {
       message.error('获取分类列表失败');
@@ -69,7 +66,7 @@ const ProductCategoryManagement = () => {
     setParentUUID(parentUUID0);
     form.resetFields();
     if (parentUUID0) {
-        form.setFieldsValue({ parent_uuid: getParentName(parentUUID0) });
+      form.setFieldsValue({ parent_uuid: getParentName(parentUUID0) });
     }
 
     setIsModalVisible(true);
@@ -86,7 +83,7 @@ const ProductCategoryManagement = () => {
   const handleDeleteCategory = async (uuid) => {
     setLoading(true);
     try {
-      await deleteProductCategory({ uuid });
+      await categoryServices.deleteProductCategory({ uuid });
       message.success('删除成功');
       fetchCategories();
     } catch (error) {
@@ -101,10 +98,10 @@ const ProductCategoryManagement = () => {
       const values = await form.validateFields();
       values.parentUuid = parentUUID || '';
       if (editingCategory) {
-        await updateProductCategory({ ...editingCategory, ...values });
+        await categoryServices.updateProductCategory({ ...editingCategory, ...values });
         message.success('更新成功');
       } else {
-        await addProductCategory(values);
+        await categoryServices.addProductCategory(values);
         message.success('添加成功');
       }
       setIsModalVisible(false);

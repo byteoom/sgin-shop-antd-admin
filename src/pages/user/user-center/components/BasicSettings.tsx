@@ -1,4 +1,4 @@
-import { getMyUserInfo, updateUser, updateAvatar } from '@/services/user';
+import { userService } from '@/services';
 import { UploadOutlined } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Form, Input, message, Row, Upload } from 'antd';
 import { useEffect, useState } from 'react';
@@ -27,7 +27,7 @@ const BasicSettings = () => {
   const handleUpdate = async (values) => {
     setLoading(true);
     try {
-      const res = await updateUser({ uuid: currentUser.uuid, ...values });
+      const res = await userService.updateUser({ uuid: currentUser.uuid, ...values });
       if (res.code !== 200) {
         message.error('更新失败 :' + res.message);
         return;
@@ -54,7 +54,7 @@ const BasicSettings = () => {
       formData.append('file', file);
 
       try {
-        const res = await updateAvatar(formData); // 确保 updateAvatar 发送请求到服务器的正确端点
+        const res = await userService.updateAvatar(formData); // 确保 updateAvatar 发送请求到服务器的正确端点
         if (res.code !== 200) {
           message.error('上传失败 :' + res.message);
           return;

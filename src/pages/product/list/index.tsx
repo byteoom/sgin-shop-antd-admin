@@ -1,4 +1,4 @@
-import { deleteProduct, getProducts } from '@/services/product/product';
+import { productServices } from '@/services';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import ProTable from '@ant-design/pro-table';
@@ -39,7 +39,7 @@ let navigate = useNavigate();
     };
 
     try {
-      const response = await getProducts(queryParams);
+      const response = await productServices.getProducts(queryParams);
       if (response.code !== 200) {
         return {
           data: [],
@@ -63,7 +63,7 @@ let navigate = useNavigate();
 
   const handleDeleteProduct = async (id) => {
     try {
-      const res = await deleteProduct({ uuids: [id] });
+      const res = await productServices.deleteProduct({ uuids: [id] });
       if (res.code !== 200) {
         message.error('删除失败 :' + res.message);
       } else {

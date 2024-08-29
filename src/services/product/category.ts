@@ -1,7 +1,16 @@
 import { request } from '@umijs/max';
+import {
+  BaseListResult,
+  BaseResult,
+  O_IDS,
+  ProductCategory,
+  ProductListQueryParams,
+} from '../types';
 
 // Fetch the list of product categories
-export async function getProductCategories(query) {
+async function getProductCategories(
+  query: ProductListQueryParams,
+): Promise<BaseListResult<ProductCategory>> {
   return request('/api/v1/product_category/list', {
     method: 'POST',
     data: query,
@@ -9,7 +18,7 @@ export async function getProductCategories(query) {
 }
 
 // Create a new product category
-export async function addProductCategory(data) {
+async function addProductCategory(data: ProductCategory): Promise<BaseResult> {
   return request('/api/v1/product_category/create', {
     method: 'POST',
     data,
@@ -17,7 +26,7 @@ export async function addProductCategory(data) {
 }
 
 // Update an existing product category
-export async function updateProductCategory(data) {
+async function updateProductCategory(data: ProductCategory): Promise<BaseResult> {
   return request('/api/v1/product_category/update', {
     method: 'POST',
     data,
@@ -25,7 +34,7 @@ export async function updateProductCategory(data) {
 }
 
 // Delete a product category
-export async function deleteProductCategory(data) {
+async function deleteProductCategory(data: O_IDS) {
   return request('/api/v1/product_category/delete', {
     method: 'POST',
     data,
@@ -33,8 +42,16 @@ export async function deleteProductCategory(data) {
 }
 
 // Get all product categories (assuming implementation in backend)
-export async function getAllProductCategories() {
+async function getAllProductCategories() {
   return request('/api/v1/product_category/all', {
     method: 'POST',
   });
 }
+
+export const categoryServices = {
+  getProductCategories,
+  addProductCategory,
+  updateProductCategory,
+  deleteProductCategory,
+  getAllProductCategories,
+};

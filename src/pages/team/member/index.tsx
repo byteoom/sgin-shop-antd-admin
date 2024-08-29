@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, message, Popconfirm, Modal, Form, Select } from 'antd';
 import ProTable from '@ant-design/pro-table';
-import { addTeamMember, deleteTeamMember, getTeamMembers } from '@/services/team/team_member';
-import { getUserOptions } from '@/services/user'; // 假设有获取用户列表的服务
+import { teamService } from '@/services';
+import { userService } from '@/services'; // 假设有获取用户列表的服务
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { useParams } from 'react-router-dom';
@@ -23,7 +23,7 @@ const TeamMemberManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await getUserOptions();
+      const response = await userService.getUserOptions();
       if (response.code === 200) {
         setUsers(response.data);
       } else {
@@ -42,7 +42,7 @@ const TeamMemberManagement = () => {
 
   const handleDeleteMember = async (id) => {
     try {
-      const res = await deleteTeamMember({ uuid: id });
+      const res = await teamService.deleteTeamMember({ uuid: id });
       if (res.code !== 200) {
         message.error('删除失败 :' + res.message);
       } else {
@@ -58,7 +58,7 @@ const TeamMemberManagement = () => {
     try {
       const values = await form.validateFields();
       values.team_uuid = teamId;
-      const res = await addTeamMember(values);
+      const res = await teamService.addTeamMember(values);
       if (res.code === 200) {
         message.success('添加成功');
       } else {
@@ -104,7 +104,7 @@ const TeamMemberManagement = () => {
 
   const queryMembers = async (params, sort, filter) => {
     try {
-      const response = await getTeamMembers({ ...params, ...sort, ...filter, team_uuid: teamId });
+      const response = await teamService.getTeamMembers({ ...params, ...sort, ...filter, team_uuid: teamId });
       if (response.code !== 200) {
         return {
           data: [],

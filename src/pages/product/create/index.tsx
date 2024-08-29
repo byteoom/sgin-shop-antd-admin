@@ -1,4 +1,4 @@
-import { addProduct } from '@/services/product/product';
+import { productServices } from '@/services';
 import { createResource } from '@/services/sys/resource';
 import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
@@ -123,7 +123,7 @@ const ProductForm = () => {
         images: uploadedFileIds, // 上传的图片资源 ID
       };
 
-      const result = await addProduct(productData);
+      const result = await productServices.addProduct(productData);
 
       if (result.code == 200) {
         message.success('产品创建成功！');

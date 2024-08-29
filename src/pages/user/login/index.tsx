@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, Input, Button, Checkbox, Card, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { login } from '@/services/user';
+import { userService } from '@/services';
 import Cookie from 'js-cookie';
 import { history } from '@umijs/max';
 
@@ -9,7 +9,7 @@ const LoginPage = () => {
 
 
   const onFinish = (values) => {
-    login(values)
+    userService.login(values)
       .then((res) => {
         if (res.code === 200) {
           message.success('登录成功');

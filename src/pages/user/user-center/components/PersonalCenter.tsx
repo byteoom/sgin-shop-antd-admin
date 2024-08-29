@@ -1,4 +1,4 @@
-import { getMyUserInfo } from '@/services/user';
+import { userService } from '@/services';
 import {
   Avatar,
   Card,
@@ -22,7 +22,7 @@ const PersonalCenter = () => {
     const fetchUserInfo = async () => {
       setLoading(true);
       try {
-        const response = await getMyUserInfo();
+        const response = await userService.getMyUserInfo();
         setUser(response.data);
       } catch (error) {
         message.error('获取用户信息失败');

@@ -1,7 +1,7 @@
 // 运行时配置
 import Footer from '@/components/Footer';
 import RightContent from '@/components/RightContent';
-import { getMyUserInfo } from '@/services/user';
+import { userService } from '@/services';
 import type { AxiosError, RequestConfig, RequestOptions } from '@umijs/max';
 import { history } from '@umijs/max';
 import Cookies from 'js-cookie';
@@ -16,7 +16,7 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const userInfo = await getMyUserInfo();
+      const userInfo = await userService.getMyUserInfo();
       if (userInfo.code !== 200) {
         history.push(loginPath);
         return undefined;
@@ -50,6 +50,7 @@ export const layout = () => {
     footerRender: () => <Footer />,
   };
 };
+
 
 export const request: RequestConfig = {
   withCredentials: true,

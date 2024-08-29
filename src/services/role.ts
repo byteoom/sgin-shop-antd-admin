@@ -1,7 +1,16 @@
 import { request } from '@umijs/max';
+import {
+  BaseListResult,
+  BaseResult,
+  O_IDS,
+  Role,
+  TeamQueryParams,
+} from './types';
 
 // 获取角色列表
-export async function getRoles(params) {
+async function getRoles(
+  params: TeamQueryParams,
+): Promise<BaseListResult<Role>> {
   return request('/api/v1/role/list', {
     method: 'POST',
     data: params,
@@ -9,7 +18,7 @@ export async function getRoles(params) {
 }
 
 // 创建角色
-export async function addRole(data) {
+async function addRole(data: Role): Promise<BaseResult> {
   return request('/api/v1/role/create', {
     method: 'POST',
     data,
@@ -17,7 +26,7 @@ export async function addRole(data) {
 }
 
 // 更新角色
-export async function updateRole(data) {
+async function updateRole(data: Role): Promise<BaseResult> {
   return request('/api/v1/role/update', {
     method: 'POST',
     data,
@@ -25,9 +34,11 @@ export async function updateRole(data) {
 }
 
 // 删除角色
-export async function deleteRole(data) {
+async function deleteRole(data: O_IDS): Promise<BaseResult> {
   return request('/api/v1/role/delete', {
     method: 'POST',
     data,
   });
 }
+
+export const roleService = { getRoles, addRole, updateRole, deleteRole };

@@ -1,4 +1,4 @@
-import { deleteOrder, getOrders, getOrderItemList } from '@/services/order/order';
+import {orderServices} from '@/services';
 import { DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import ProTable from '@ant-design/pro-table';
@@ -23,7 +23,7 @@ const OrderManagement = () => {
     };
 
     try {
-      const response = await getOrders(queryParams);
+      const response = await orderServices.getOrders(queryParams);
       if (response.code !== 200) {
         return {
           data: [],
@@ -47,7 +47,7 @@ const OrderManagement = () => {
 
   const handleDeleteOrder = async (id) => {
     try {
-      const res = await deleteOrder({ id });
+      const res = await orderServices.deleteOrder({ id });
       if (res.code !== 200) {
         message.error('删除失败 :' + res.message);
       } else {
@@ -78,7 +78,7 @@ const OrderManagement = () => {
 
   const handlePreviewOrderItems = async (orderID) => {
     try {
-      const response = await getOrderItemList({ order_id: orderID });
+      const response = await orderServices.getOrderItemList({ order_id: orderID });
       if (response.code === 200) {
         setOrderItems(response.data);
         setPreviewVisible(true);
