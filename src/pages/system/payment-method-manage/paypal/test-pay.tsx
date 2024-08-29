@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Input, Button, message, Modal } from 'antd';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import { fetchPayPalClientId, requestPayPalPayment } from '@/services/payment';
+import { paymentService } from '@/services';
 
 const PayPalTest = () => {
   const [form] = Form.useForm();
@@ -14,7 +14,7 @@ const PayPalTest = () => {
   useEffect(() => {
     const getClientId = async () => {
       try {
-        const response = await fetchPayPalClientId("sandbox");
+        const response = await paymentService.fetchPayPalClientId("sandbox");
         if (response.code === 200) {
           setClientId(response.data);
         } else {
@@ -32,7 +32,7 @@ const PayPalTest = () => {
     setLoading(true);
     try {
         values.amount = parseFloat(values.amount);
-      const response = await requestPayPalPayment(values);
+      const response = await paymentService.requestPayPalPayment(values);
 
       if (response.code === 200 && response.data && response.data.id) {
         setOrderId(response.data.id); // Store the PayPal order ID

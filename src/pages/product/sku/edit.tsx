@@ -1,4 +1,4 @@
-import { getProductItem, updateProductItem } from '@/services/product/product';
+import { productServices } from '@/services';
 import { DeleteOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
@@ -93,7 +93,7 @@ const SkuEdit = () => {
   const fetchSkuDetails = async (uuid) => {
     try {
       setLoading(true);
-      const response = await getProductItem({ uuid });
+      const response = await productServices.getProductItem({ uuid });
       if (response.code === 200) {
         if (response.data.name == '') {
           response.data.name = response.data.product_info.name;
@@ -132,7 +132,7 @@ const SkuEdit = () => {
     try {
       const values = await form.validateFields();
       values.images = images.join(',');
-      const response = await updateProductItem(values);
+      const response = await productServices.updateProductItem(values);
       if (response.code === 200) {
         message.success('更新成功');
         history.push('/sku');

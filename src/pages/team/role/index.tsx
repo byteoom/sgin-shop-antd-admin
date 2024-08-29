@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, message, Popconfirm, Modal, Form, Input, Switch } from 'antd';
 import ProTable from '@ant-design/pro-table';
-import { getRoles, addRole, updateRole, deleteRole } from '@/services/team/role';
+import { roleService } from '@/services';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { useParams } from 'react-router-dom';
@@ -27,7 +27,7 @@ const RoleManagement = () => {
 
   const handleDeleteRole = async (id) => {
     try {
-      const res = await deleteRole({ uuid: id });
+      const res = await roleService.deleteRole({ uuid: id });
       if (res.code !== 200) {
         message.error('删除失败 :' + res.message);
       } else {
@@ -44,10 +44,10 @@ const RoleManagement = () => {
       const values = await form.validateFields();
       values.team_uuid = teamId;
       if (editingRole) {
-        await updateRole({ ...editingRole, ...values });
+        await roleService.updateRole({ ...editingRole, ...values });
         message.success('更新成功');
       } else {
-        const res = await addRole(values);
+        const res = await roleService.addRole(values);
         if (res.code === 200) {
           message.success('添加成功');
         } else {
@@ -103,7 +103,7 @@ const RoleManagement = () => {
 
   const queryRoles = async (params, sort, filter) => {
     try {
-      const response = await getRoles({ ...params, ...sort, ...filter, team_uuid: teamId });
+      const response = await roleService.getRoles({ ...params, ...sort, ...filter, team_uuid: teamId });
       if (response.code !== 200) {
         return {
           data: [],

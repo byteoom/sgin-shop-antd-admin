@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Tree, message, Card, Col, Row } from 'antd';
 import { useParams } from 'react-router-dom';
 import { getPermissions } from '@/services/sys/permission';
-import { getUserInfo } from '@/services/user';
+import { userService } from '@/services';
 import { history } from '@umijs/max';
 import { getUserPermissionInfo, addUserPermission } from '@/services/sys/permission_user';
 import { PageContainer } from "@ant-design/pro-components";
@@ -21,7 +21,7 @@ const BindPermissionsPage = () => {
 
   const fetchUserInfo = async (userId) => {
     try {
-      const response = await getUserInfo(userId);
+      const response = await userService.getUserInfo(userId);
       if (response.code === 200) {
         setUserInfo(response.data);
       } else {

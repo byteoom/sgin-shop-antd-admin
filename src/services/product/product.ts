@@ -1,7 +1,8 @@
 import { request } from '@umijs/max';
+import { BaseListResult, BaseResult, O_IDS, O_UUIDS, Product, ProductCategory, ProductCategoryListQueryParams, ProductListQueryParams } from '../types';
 
 // 创建一个新的产品
-export async function addProduct(data) {
+async function addProduct(data: Product): Promise<BaseResult> {
   return request('/api/v1/product/create', {
     method: 'POST',
     data,
@@ -9,7 +10,7 @@ export async function addProduct(data) {
 }
 
 
-export async function getProducts(query) {
+async function getProducts(query: ProductListQueryParams): Promise<BaseListResult<Product>> {
   return request('/api/v1/product/list', {
     method: 'POST',
     data: query,
@@ -17,21 +18,21 @@ export async function getProducts(query) {
 }
 
 
-export async function updateProduct(data) {
+export async function updateProduct(data: Product): Promise<BaseResult> {
   return request('/api/v1/product/update', {
     method: 'POST',
     data,
   });
 }
 
-export async function deleteProduct(data) {
+async function deleteProduct(ids: O_UUIDS): Promise<BaseResult> {
   return request('/api/v1/product/delete', {
     method: 'POST',
-    data,
+    data: ids,
   });
 }
 
-export async function getProduct(data) {
+async function getProduct(data: O_IDS): Promise<BaseResult<Product>> {
   return request('/api/v1/product/info', {
     method: 'POST',
     data,
@@ -39,14 +40,14 @@ export async function getProduct(data) {
 }
 
 
-export async function getProductItems(data) {
+async function getProductItems(params: ProductCategoryListQueryParams): Promise<BaseListResult<ProductCategory>> {
   return request('/api/v1/product/item/list', {
     method: 'POST',
-    data,
+    data: params,
   });
 }
 
-export async function deleteProductItem(data) {
+async function deleteProductItem(data: O_UUIDS): Promise<BaseResult> {
   return request('/api/v1/product/item/delete', {
     method: 'POST',
     data,
@@ -54,7 +55,7 @@ export async function deleteProductItem(data) {
 }
 
 // getProductItem
-export async function getProductItem(data) {
+async function getProductItem(data: O_IDS): Promise<BaseResult<ProductCategory>> {
   return request('/api/v1/product/item/info', {
     method: 'POST',
     data,
@@ -62,9 +63,21 @@ export async function getProductItem(data) {
 }
 
 // updateProductItem
-export async function updateProductItem(data) {
+async function updateProductItem(data: ProductCategory): Promise<BaseResult> {
   return request('/api/v1/product/item/update', {
     method: 'POST',
     data,
   });
+}
+
+export const productServices = {
+  addProduct,
+  getProducts,
+  updateProduct,
+  deleteProduct,
+  getProduct,
+  getProductItems,
+  deleteProductItem,
+  getProductItem,
+  updateProductItem,
 }

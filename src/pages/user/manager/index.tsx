@@ -1,6 +1,8 @@
-import { addUser, deleteUser, getUsers, updateUser } from '@/services/user';
+import { userService } from '@/services';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { PageContainer } from '@ant-design/pro-components';
 import ProTable from '@ant-design/pro-table';
+import { history } from '@umijs/max';
 import {
   Button,
   Form,
@@ -8,18 +10,15 @@ import {
   message,
   Modal,
   Popconfirm,
+  Progress,
   Select,
   Tag,
   Typography,
-  Progress,
 } from 'antd';
 import { useRef, useState } from 'react';
-import { PageContainer } from '@ant-design/pro-components';
-import { history } from '@umijs/max';
 
 const { Option } = Select;
 const { Text } = Typography;
-
 
 const UserManagement = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -45,7 +44,7 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (id) => {
     try {
-      const res = await deleteUser({ uuid: id });
+      const res = await userService.deleteUser({ uuid: id });
       if (res.code !== 200) {
         message.error('删除失败 :' + res.message);
       } else {
@@ -63,10 +62,10 @@ const UserManagement = () => {
       values.age = parseInt(values.age ? values.age : 0);
       values.password_strength = passwordStrength;
       if (editingUser) {
-        await updateUser({ ...editingUser, ...values });
+        await userService.updateUser({ ...editingUser, ...values });
         message.success('更新成功');
       } else {
-        const res = await addUser(values);
+        const res = await userService.addUser(values);
         if (res.code === 200) {
           message.success('添加成功');
         } else {
@@ -136,13 +135,13 @@ const UserManagement = () => {
 
   const queryUser = async (params, sort, filter) => {
     const queryParams = {
-     ...params,
+      ...params,
       ...sort,
       ...filter,
     };
 
     try {
-      const response = await getUsers(queryParams);
+      const response = await userService.getUsers(queryParams);
       if (response.code !== 200) {
         return {
           data: [],
@@ -170,7 +169,7 @@ const UserManagement = () => {
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', hideInSearch: true },
-    { title: 'UUID', dataIndex: 'uuid', key: 'uuid', width: 300,  },
+    { title: 'UUID', dataIndex: 'uuid', key: 'uuid', width: 300 },
     { title: '邮箱', dataIndex: 'email', key: 'email' },
     { title: '用户名', dataIndex: 'username', key: 'username' },
     { title: '手机号', dataIndex: 'phone', key: 'phone' },
@@ -188,7 +187,12 @@ const UserManagement = () => {
       render: (sex) => renderSex(sex),
       hideInSearch: true,
     },
-    { title: '个性签名', dataIndex: 'signed', key: 'signed', hideInSearch: true },
+    {
+      title: '个性签名',
+      dataIndex: 'signed',
+      key: 'signed',
+      hideInSearch: true,
+    },
     {
       title: '操作',
       key: 'action',
@@ -207,7 +211,13 @@ const UserManagement = () => {
             cancelText="否"
           >
             <Button icon={<DeleteOutlined />} danger />
-            <Button onClick={() => handleBindPermissions(record)} style={{ marginLeft: 8 }}> 授权 </Button>
+            <Button
+              onClick={() => handleBindPermissions(record)}
+              style={{ marginLeft: 8 }}
+            >
+              {' '}
+              授权{' '}
+            </Button>
           </Popconfirm>
         </span>
       ),
@@ -273,11 +283,17 @@ const UserManagement = () => {
             label="密码"
             rules={[{ required: !editingUser, message: '请输入密码' }]}
           >
-            <Input.Password onChange={(e) => checkPasswordStrength(e.target.value)} />
+            <Input.Password
+              onChange={(e) => checkPasswordStrength(e.target.value)}
+            />
           </Form.Item>
           <div>
             <Text>密码强度: {strengthLabel}</Text>
-            <Progress percent={passwordStrength} showInfo={false} strokeColor={progressColor} />
+            <Progress
+              percent={passwordStrength}
+              showInfo={false}
+              strokeColor={progressColor}
+            />
           </div>
           <Form.Item
             name="status"

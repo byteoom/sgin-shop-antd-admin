@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, message, Popconfirm, Modal, Form, Input, Switch } from 'antd';
 import ProTable from '@ant-design/pro-table';
-import { addTeam, deleteTeam, getTeams, updateTeam } from '@/services/team';
+import { teamService } from '@/services';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
@@ -26,7 +26,7 @@ const TeamManagement = () => {
 
   const handleDeleteTeam = async (id) => {
     try {
-      const res = await deleteTeam({ uuid: id });
+      const res = await teamService.deleteTeam({ uuid: id });
       if (res.code !== 200) {
         message.error('删除失败 :' + res.message);
       } else {
@@ -42,10 +42,10 @@ const TeamManagement = () => {
     try {
       const values = await form.validateFields();
       if (editingTeam) {
-        await updateTeam({ ...editingTeam, ...values });
+        await teamService.updateTeam({ ...editingTeam, ...values });
         message.success('更新成功');
       } else {
-        const res = await addTeam(values);
+        const res = await teamService.addTeam(values);
         if (res.code === 200) {
           message.success('添加成功');
         } else {
@@ -111,7 +111,7 @@ const TeamManagement = () => {
 
   const queryTeams = async (params, sort, filter) => {
     try {
-      const response = await getTeams({ ...params, ...sort, ...filter });
+      const response = await teamService.getTeams({ ...params, ...sort, ...filter });
       if (response.code !== 200) {
         return {
           data: [],

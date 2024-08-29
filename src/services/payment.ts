@@ -1,17 +1,21 @@
 import { request } from '@umijs/max';
 
-export async function fetchPayPalClientId(env) {
+async function fetchPayPalClientId(env: any) {
   return request('/api/v1/payment_method/paypal/client_id', {
     method: 'POST',
-    data: {"env": env},
+    data: { env: env },
   });
 }
 
-
 // requestPayPalPayment
-export async function requestPayPalPayment(data) {
+async function requestPayPalPayment(data: any) {
   return request('/api/v1/payment_method/paypal/sandbox/create_test', {
     method: 'POST',
     data,
   });
 }
+
+export const paymentService = {
+  fetchPayPalClientId,
+  requestPayPalPayment,
+};

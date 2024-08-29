@@ -1,4 +1,4 @@
-import { deleteProductItem, getProductItems } from '@/services/product/product';
+import { productServices} from '@/services';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import ProTable from '@ant-design/pro-table';
@@ -25,7 +25,7 @@ const SkuManagement = () => {
     };
 
     try {
-      const response = await getProductItems(queryParams);
+      const response = await productServices.getProductItems(queryParams);
       if (response.code !== 200) {
         return {
           data: [],
@@ -49,7 +49,7 @@ const SkuManagement = () => {
 
   const handleDeleteSku = async (id) => {
     try {
-      const res = await deleteProductItem({ uuids: [id] });
+      const res = await productServices.deleteProductItem({ uuids: [id] });
       if (res.code !== 200) {
         message.error('删除失败 :' + res.message);
       } else {

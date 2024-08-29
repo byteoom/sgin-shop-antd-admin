@@ -1,4 +1,4 @@
-import { getMyUserInfo, updateUser } from '@/services/user';
+import { userService } from '@/services';
 import {
   Button,
   Card,
@@ -32,7 +32,7 @@ const SecuritySettings = () => {
   const fetchSecurityInfo = async () => {
     setLoading(true);
     try {
-      const response = await getMyUserInfo();
+      const response = await userService.getMyUserInfo();
       setSecurityInfo(response.data);
     } catch (error) {
       message.error('获取安全信息失败');
@@ -42,7 +42,6 @@ const SecuritySettings = () => {
   };
 
   useEffect(() => {
-  
     fetchSecurityInfo();
   }, []);
 
@@ -76,7 +75,7 @@ const SecuritySettings = () => {
     }
     setLoading(true);
     try {
-      const res = await updateUser({
+      const res = await userService.updateUser({
         uuid: securityInfo.uuid,
         password: values.newPassword,
         password_strength: passwordStrength,
@@ -99,10 +98,10 @@ const SecuritySettings = () => {
   const hanldePhoneChange = async (values) => {
     setLoading(true);
     try {
-      const res = await updateUser({
+      const res = await userService.updateUser({
         uuid: securityInfo.uuid,
         phone: values.phone,
-      });
+      } as any);
       if (res.code !== 200) {
         message.error('手机号更新失败');
         return;
@@ -120,10 +119,10 @@ const SecuritySettings = () => {
   const hanldeEmailChange = async (values) => {
     setLoading(true);
     try {
-      const res = await updateUser({
+      const res = await userService.updateUser({
         uuid: securityInfo.uuid,
         email: values.email,
-      });
+      } as any);
       if (res.code !== 200) {
         message.error('邮箱更新失败');
         return;
@@ -136,7 +135,7 @@ const SecuritySettings = () => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const checkPasswordStrength = (value) => {
     let strength = 0;
@@ -181,140 +180,148 @@ const SecuritySettings = () => {
   };
 
   const getPasswordStrength = () => {
-    const { label, color } = formatPasswordStrength(securityInfo.password_strength);
+    const { label, color } = formatPasswordStrength(
+      securityInfo.password_strength,
+    );
     return <Text style={{ color }}>{label}</Text>;
   };
 
   return (
-    securityInfo && <Card loading={loading}>
-      <Title level={4}>安全设置</Title>
-      <Divider />
-      <Row gutter={16}>
-        <Col span={24}>
-          <Row>
-            <Col span={12}>
-              <Paragraph>账户密码</Paragraph>
-            </Col>
-            <Col span={12} style={{ textAlign: 'right' }}>
-              <Button type="link" onClick={handlePasswordChange}>
-                修改
+    securityInfo && (
+      <Card loading={loading}>
+        <Title level={4}>安全设置</Title>
+        <Divider />
+        <Row gutter={16}>
+          <Col span={24}>
+            <Row>
+              <Col span={12}>
+                <Paragraph>账户密码</Paragraph>
+              </Col>
+              <Col span={12} style={{ textAlign: 'right' }}>
+                <Button type="link" onClick={handlePasswordChange}>
+                  修改
+                </Button>
+              </Col>
+            </Row>
+            <Paragraph type="secondary">
+              当前密码强度：{getPasswordStrength()}
+            </Paragraph>
+            <Divider />
+            <Row>
+              <Col span={12}>
+                <Paragraph>手机</Paragraph>
+              </Col>
+              <Col span={12} style={{ textAlign: 'right' }}>
+                <Button type="link" onClick={handlePhoneChange}>
+                  修改
+                </Button>
+              </Col>
+            </Row>
+            <Paragraph type="secondary">
+              已绑定手机：{securityInfo?.phone}
+            </Paragraph>
+            <Divider />
+
+            <Row>
+              <Col span={12}>
+                <Paragraph>邮箱</Paragraph>
+              </Col>
+              <Col span={12} style={{ textAlign: 'right' }}>
+                <Button type="link" onClick={handleEmailChange}>
+                  修改
+                </Button>
+              </Col>
+            </Row>
+            <Paragraph type="secondary">
+              已绑定邮箱：{securityInfo?.email}
+            </Paragraph>
+          </Col>
+        </Row>
+
+        <Modal
+          title="修改密码"
+          open={isModalVisible}
+          onCancel={handleCancel}
+          footer={null}
+        >
+          <Form form={form} layout="vertical" onFinish={handlePasswordUpdate}>
+            <Form.Item
+              name="newPassword"
+              label="新密码"
+              rules={[{ required: true, message: '请输入新密码' }]}
+            >
+              <Input.Password
+                onChange={(e) => checkPasswordStrength(e.target.value)}
+              />
+            </Form.Item>
+            <div>
+              <Text>密码强度: {strengthLabel}</Text>
+              <Progress
+                percent={passwordStrength}
+                showInfo={false}
+                strokeColor={progressColor}
+              />
+            </div>
+            <Form.Item
+              name="rePassword"
+              label="确认密码"
+              rules={[{ required: true, message: '请再次输入密码' }]}
+            >
+              <Input.Password />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                更新密码
               </Button>
-            </Col>
-          </Row>
-          <Paragraph type="secondary">当前密码强度：{ getPasswordStrength() }</Paragraph>
-          <Divider />
-          <Row>
-            <Col span={12}>
-              <Paragraph>手机</Paragraph>
-            </Col>
-            <Col span={12} style={{ textAlign: 'right' }}>
-              <Button type="link" onClick={handlePhoneChange}>
-                修改
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        <Modal
+          title="修改手机号码"
+          open={isModalVisiblePhone}
+          onCancel={handleCancel}
+          footer={null}
+        >
+          <Form form={formPhone} layout="vertical" onFinish={hanldePhoneChange}>
+            <Form.Item
+              name="phone"
+              label="手机号"
+              rules={[{ required: true, message: '请输入手机号' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                更新手机号
               </Button>
-            </Col>
-          </Row>
-          <Paragraph type="secondary">
-            已绑定手机：{securityInfo?.phone}
-          </Paragraph>
-          <Divider />
+            </Form.Item>
+          </Form>
+        </Modal>
 
-          <Row>
-            <Col span={12}>
-              <Paragraph>邮箱</Paragraph>
-            </Col>
-            <Col span={12} style={{ textAlign: 'right' }}>
-              <Button type="link" onClick={handleEmailChange}>修改</Button>
-            </Col>
-          </Row>
-          <Paragraph type="secondary">
-            已绑定邮箱：{securityInfo?.email}
-          </Paragraph>
-        </Col>
-      </Row>
-
-      <Modal
-        title="修改密码"
-        open={isModalVisible}
-        onCancel={handleCancel}
-        footer={null}
-      >
-        <Form form={form} layout="vertical" onFinish={handlePasswordUpdate}>
-          <Form.Item
-            name="newPassword"
-            label="新密码"
-            rules={[{ required: true, message: '请输入新密码' }]}
-          >
-            <Input.Password
-              onChange={(e) => checkPasswordStrength(e.target.value)}
-            />
-          </Form.Item>
-          <div>
-            <Text>密码强度: {strengthLabel}</Text>
-            <Progress
-              percent={passwordStrength}
-              showInfo={false}
-              strokeColor={progressColor}
-            />
-          </div>
-          <Form.Item
-            name="rePassword"
-            label="确认密码"
-            rules={[{ required: true, message: '请再次输入密码' }]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              更新密码
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title="修改手机号码"
-        open={isModalVisiblePhone}
-        onCancel={handleCancel}
-        footer={null}
-      >
-        <Form form={formPhone} layout="vertical" onFinish={hanldePhoneChange}>
-          <Form.Item
-            name="phone"
-            label="手机号"
-            rules={[{ required: true, message: '请输入手机号' }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              更新手机号
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title="修改邮箱"
-        open={isModalVisibleEmail}
-        onCancel={handleCancel}
-        footer={null}
-      >
-        <Form form={formEmail} layout="vertical" onFinish={hanldeEmailChange}>
-          <Form.Item
-            name="email"
-            label="邮箱"
-            rules={[{ required: true, message: '请输入邮箱' }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              更新邮箱
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </Card>
+        <Modal
+          title="修改邮箱"
+          open={isModalVisibleEmail}
+          onCancel={handleCancel}
+          footer={null}
+        >
+          <Form form={formEmail} layout="vertical" onFinish={hanldeEmailChange}>
+            <Form.Item
+              name="email"
+              label="邮箱"
+              rules={[{ required: true, message: '请输入邮箱' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                更新邮箱
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </Card>
+    )
   );
 };
 
