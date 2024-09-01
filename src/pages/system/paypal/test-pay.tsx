@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Form, Input, Button, message, Modal } from 'antd';
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import { paymentService } from '@/services';
+import { paymentApi } from '@/services';
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { Button, Card, Form, Input, message, Modal } from 'antd';
+import { useEffect, useState } from 'react';
 
 const PayPalTest = () => {
   const [form] = Form.useForm();
@@ -14,7 +14,7 @@ const PayPalTest = () => {
   useEffect(() => {
     const getClientId = async () => {
       try {
-        const response = await paymentService.fetchPayPalClientId("sandbox");
+        const response = await paymentApi.fetchPayPalClientId('sandbox');
         if (response.code === 200) {
           setClientId(response.data);
         } else {
@@ -31,8 +31,8 @@ const PayPalTest = () => {
   const handleFormSubmit = async (values) => {
     setLoading(true);
     try {
-        values.amount = parseFloat(values.amount);
-      const response = await paymentService.requestPayPalPayment(values);
+      values.amount = parseFloat(values.amount);
+      const response = await paymentApi.requestPayPalPayment(values);
 
       if (response.code === 200 && response.data && response.data.id) {
         setOrderId(response.data.id); // Store the PayPal order ID
@@ -57,8 +57,17 @@ const PayPalTest = () => {
   return (
     <div>
       {clientId && (
-        <PayPalScriptProvider options={{ "client-id": clientId, currency: "USD", intent: "capture" }}>
-          <Card title="PayPal Payment Test" style={{ maxWidth: 600, margin: "0 auto" }}>
+        <PayPalScriptProvider
+          options={{
+            'client-id': clientId,
+            currency: 'USD',
+            intent: 'capture',
+          }}
+        >
+          <Card
+            title="PayPal Payment Test"
+            style={{ maxWidth: 600, margin: '0 auto' }}
+          >
             <Form
               form={form}
               layout="vertical"
@@ -71,15 +80,27 @@ const PayPalTest = () => {
               <Form.Item
                 name="amount"
                 label="Payment Amount"
-                rules={[{ required: true, message: 'Please enter the payment amount' }]}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please enter the payment amount',
+                  },
+                ]}
               >
-                <Input type="number" min="1" step="0.01" placeholder="Enter payment amount" />
+                <Input
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  placeholder="Enter payment amount"
+                />
               </Form.Item>
 
               <Form.Item
                 name="productName"
                 label="Product Name"
-                rules={[{ required: true, message: 'Please enter the product name' }]}
+                rules={[
+                  { required: true, message: 'Please enter the product name' },
+                ]}
               >
                 <Input placeholder="Enter product name" />
               </Form.Item>
@@ -99,7 +120,7 @@ const PayPalTest = () => {
             >
               {orderId && (
                 <PayPalButtons
-                  style={{ layout: "vertical" }}
+                  style={{ layout: 'vertical' }}
                   createOrder={() => {
                     return orderId; // Return the PayPal order ID directly
                   }}
@@ -108,14 +129,18 @@ const PayPalTest = () => {
                     handlePaymentSuccess(order.id);
                   }}
                   onError={(err) => {
-                    message.error("An error occurred during payment processing");
+                    message.error(
+                      'An error occurred during payment processing',
+                    );
                     console.error(err);
                   }}
                 />
               )}
             </Modal>
 
-            {paid && <div style={{ marginTop: 20 }}>Thank you for your purchase!</div>}
+            {paid && (
+              <div style={{ marginTop: 20 }}>Thank you for your purchase!</div>
+            )}
           </Card>
         </PayPalScriptProvider>
       )}

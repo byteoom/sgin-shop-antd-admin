@@ -1,25 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Modal, Form, Input, message, Popconfirm, Switch, Select, Dropdown, Menu, Pagination, Row, Col, Card } from 'antd';
-import ProTable from '@ant-design/pro-table';
-import { PlusOutlined, EditOutlined, DeleteOutlined, DownOutlined } from '@ant-design/icons';
-import * as icons from '@ant-design/icons';
-import { getMenus, addMenu, updateMenu, deleteMenu } from '@/services/sys/menu';
+import { menuApi } from '@/services';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
+import ProTable from '@ant-design/pro-table';
 import { history } from '@umijs/max';
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Select,
+  Switch,
+} from 'antd';
+import { useEffect, useState } from 'react';
 
 const { Option } = Select;
 
-const Icon = (props: { icon: string }) => {
-  const { icon } = props;
-  const antIcon: { [key: string]: any } = icons;
+// const Icon = (props: { icon: string }) => {
+//   const { icon } = props;
+//   const antIcon: { [key: string]: any } = icons;
 
-  if (!antIcon) {
-    console.warn(`Icon ${icon} is not recognized`);
-    return null;
-  }
+//   if (!antIcon) {
+//     console.warn(`Icon ${icon} is not recognized`);
+//     return null;
+//   }
 
-  return React.createElement(antIcon[icon]);
-};
+//   return React.createElement(antIcon[icon]);
+// };
 
 const MenuManagement = () => {
   const [menus, setMenus] = useState([]);
@@ -31,14 +39,28 @@ const MenuManagement = () => {
 
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    fetchMenus();
-  }, []);
+  const formatMenuTree = (menus) => {
+    const map = {};
+    menus.forEach((menu) => {
+      map[menu.uuid] = {
+        ...menu,
+        key: menu.uuid,
+        title: menu.name,
+        children: [],
+      };
+    });
+    menus.forEach((menu) => {
+      if (menu.parent_uuid && map[menu.parent_uuid]) {
+        map[menu.parent_uuid].children.push(map[menu.uuid]);
+      }
+    });
+    return Object.values(map).filter((menu) => !menu.parent_uuid);
+  };
 
   const fetchMenus = async () => {
     setLoading(true);
     try {
-      const response = await getMenus({});
+      const response = await menuApi.getMenus({});
       setMenus(formatMenuTree(response.data.data));
     } catch (error) {
       message.error('获取菜单列表失败');
@@ -46,18 +68,14 @@ const MenuManagement = () => {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchMenus();
+  }, []);
 
-  const formatMenuTree = (menus) => {
-    const map = {};
-    menus.forEach((menu) => {
-      map[menu.uuid] = { ...menu, key: menu.uuid, title: menu.name, children: [] };
-    });
-    menus.forEach((menu) => {
-      if (menu.parent_uuid && map[menu.parent_uuid]) {
-        map[menu.parent_uuid].children.push(map[menu.uuid]);
-      }
-    });
-    return Object.values(map).filter(menu => !menu.parent_uuid);
+  const getParentName = (uuid) => {
+    if (!uuid) return '';
+    const parent = menus.find((menu) => menu.uuid === uuid);
+    return parent ? parent.name : '';
   };
 
   const handleAddMenu = (parentUUID0 = null) => {
@@ -81,7 +99,7 @@ const MenuManagement = () => {
   const handleDeleteMenu = async (uuid) => {
     setLoading(true);
     try {
-      await deleteMenu({ uuid });
+      await menuApi.deleteMenu({ uuid });
       message.success('删除成功');
       fetchMenus();
     } catch (error) {
@@ -97,15 +115,15 @@ const MenuManagement = () => {
       if (parentUUID) {
         values.parent_uuid = parentUUID;
       } else {
-        values.parent_uuid = "";
+        values.parent_uuid = '';
       }
       values.icon = selectedIcon;
       values.order = parseInt(values.order ? values.order : 0);
       if (editingMenu) {
-        await updateMenu({ ...editingMenu, ...values });
+        await menuApi.updateMenu({ ...editingMenu, ...values });
         message.success('更新成功');
       } else {
-        await addMenu(values);
+        await menuApi.addMenu(values);
         message.success('添加成功');
       }
       setIsModalVisible(false);
@@ -176,7 +194,10 @@ const MenuManagement = () => {
       key: 'action',
       render: (_, record) => (
         <span>
-          <Button icon={<EditOutlined />} onClick={() => handleEditMenu(record)} />
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => handleEditMenu(record)}
+          />
           <Popconfirm
             title="确定删除吗?"
             onConfirm={() => handleDeleteMenu(record.uuid)}
@@ -185,20 +206,16 @@ const MenuManagement = () => {
           >
             <Button icon={<DeleteOutlined />} style={{ marginLeft: 8 }} />
           </Popconfirm>
-          <Button icon={<PlusOutlined />} style={{ marginLeft: 8 }} onClick={() => handleAddMenu(record.uuid)} />
-          <Button onClick={() => handleBindApi(record.uuid)}>
-            绑定API
-          </Button>
+          <Button
+            icon={<PlusOutlined />}
+            style={{ marginLeft: 8 }}
+            onClick={() => handleAddMenu(record.uuid)}
+          />
+          <Button onClick={() => handleBindApi(record.uuid)}>绑定API</Button>
         </span>
       ),
     },
   ];
-
-  const getParentName = (uuid) => {
-    if (!uuid) return '';
-    const parent = menus.find((menu) => menu.uuid === uuid);
-    return parent ? parent.name : '';
-  };
 
   return (
     <PageContainer>
