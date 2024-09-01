@@ -1,5 +1,4 @@
-import { productServices } from '@/services';
-import { createResource } from '@/services/sys/resource';
+import { productServices, resourceApi } from '@/services';
 import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
@@ -67,7 +66,7 @@ const ProductForm = () => {
 
     // 调用 API 上传文件并获取资源 ID 列表
     try {
-      const resource = await createResource(formData); // 假设 createResource 接收 FormData 对象
+      const resource = await resourceApi.createResource(formData); // 假设 createResource 接收 FormData 对象
 
       if (resource && Array.isArray(resource.data)) {
         resource.data.forEach((res) => {
@@ -125,7 +124,7 @@ const ProductForm = () => {
 
       const result = await productServices.addProduct(productData);
 
-      if (result.code == 200) {
+      if (result.code === 200) {
         message.success('产品创建成功！');
         history.push('/product/manager');
       } else {

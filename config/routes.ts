@@ -78,19 +78,19 @@ export default [
         routes: [
           {
             name: '支付方式管理',
-            path: '/system/pay/payment-method',
-            component: './system/payment-method-manage/index',
+            path: '/system/pay/index',
+            component: './system/paypal/index',
           },
           {
             name: 'paypal配置',
-            path: '/system/pay/payment-method/paypal',
-            component: './system/payment-method-manage/paypal',
+            path: '/system/pay/edit',
+            component: './system/paypal/edit',
             hideInMenu: true,
           },
           {
             name: 'paypal支付测试',
-            path: '/system/pay/payment_method/paypal-test',
-            component: './system/payment-method-manage/paypal/test-pay',
+            path: '/system/pay/paypal-test',
+            component: './system/paypal/test-pay',
           },
         ],
       },
@@ -108,7 +108,7 @@ export default [
             path: '/system/log/operation',
             component: './system/log/operation',
           },
-        ]
+        ],
       },
       {
         name: '系统配置',
@@ -129,7 +129,7 @@ export default [
             path: '/system/config/currency',
             component: './system/config/currency',
           },
-        ]
+        ],
       },
       {
         name: '用户管理',
@@ -170,7 +170,7 @@ export default [
         component: './system/menu/bind-api',
         hideInMenu: true,
       },
-   
+
       {
         name: 'api管理',
         path: '/system/api',

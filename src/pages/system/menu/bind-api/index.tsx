@@ -1,15 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Button, message, Popconfirm, Card, Row, Col } from 'antd';
-import ProTable from '@ant-design/pro-table';
-import {
-  getMenuAPIListByMenuUUID,
-  deleteMenuAPI,
-  addMenuAPI,
-} from '@/services/sys/menu_api';
-import { getMenuInfo } from '@/services/sys/menu'; // 假设有获取菜单信息的服务
+import { apiApi, menuApi } from '@/services';
+import { Api } from '@/services/types';
+import { PageContainer } from '@ant-design/pro-components';
+import ProTable, { ProColumns } from '@ant-design/pro-table';
+import { Button, Card, Col, message, Popconfirm, Row } from 'antd';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getApis } from '@/services/sys/api';
-import { PageContainer } from "@ant-design/pro-components";
 
 const BindApisPage = () => {
   const [boundApis, setBoundApis] = useState([]);
@@ -18,14 +13,9 @@ const BindApisPage = () => {
   const [menuInfo, setMenuInfo] = useState({});
   const { menuId } = useParams(); // 从路由获取菜单ID
 
-  useEffect(() => {
-    fetchMenuInfo(menuId);
-    fetchBoundApis(menuId);
-  }, [menuId]);
-
   const fetchMenuInfo = async (menuId) => {
     try {
-      const response = await getMenuInfo({ uuid: menuId });
+      const response = await menuApi.getMenuInfo({ uuid: menuId });
       if (response.code === 200) {
         setMenuInfo(response.data);
       } else {
@@ -38,13 +28,13 @@ const BindApisPage = () => {
 
   const fetchBoundApis = async (menuId) => {
     try {
-      const response = await getMenuAPIListByMenuUUID({ uuid: menuId });
-      const boundData = response.data.map(api => ({
+      const response = await menuApi.getMenuAPIListByMenuUUID({ uuid: menuId });
+      const boundData = response.data.map((api) => ({
         ...api,
         key: api.uuid,
       }));
       setBoundApis(boundData);
-      setSelectedApiKeys(boundData.map(api => api.uuid));
+      setSelectedApiKeys(boundData.map((api) => api.uuid));
     } catch (error) {
       message.error('获取已绑定API失败');
     }
@@ -52,7 +42,10 @@ const BindApisPage = () => {
 
   const handleSave = async () => {
     try {
-      await addMenuAPI({ menu_uuid: menuId, api_uuids: selectedApiKeys });
+      await menuApi.addMenuAPI({
+        menu_uuid: menuId,
+        api_uuids: selectedApiKeys,
+      });
       message.success('API绑定成功');
       fetchBoundApis(menuId); // 更新已绑定的API列表
     } catch (error) {
@@ -61,13 +54,13 @@ const BindApisPage = () => {
   };
 
   const handleDeleteApi = (apiUuid) => {
-    setBoundApis(boundApis.filter(api => api.uuid !== apiUuid));
-    setSelectedApiKeys(selectedApiKeys.filter(key => key !== apiUuid));
+    setBoundApis(boundApis.filter((api) => api.uuid !== apiUuid));
+    setSelectedApiKeys(selectedApiKeys.filter((key) => key !== apiUuid));
   };
 
   const fetchApis = async (params) => {
     try {
-      const response = await getApis(params);
+      const response = await apiApi.getApis(params);
       if (response.code !== 200) {
         return {
           data: [],
@@ -78,10 +71,10 @@ const BindApisPage = () => {
 
       // 更新availableApis，追加新的，不重复添加已有的
       const newApis = response.data.data;
-      const existingApiIds = availableApis.map(api => api.uuid);
+      const existingApiIds = availableApis.map((api) => api.uuid);
       const mergedApis = [
         ...availableApis,
-        ...newApis.filter(api => !existingApiIds.includes(api.uuid))
+        ...newApis.filter((api) => !existingApiIds.includes(api.uuid)),
       ];
       setAvailableApis(mergedApis);
 
@@ -99,7 +92,28 @@ const BindApisPage = () => {
     }
   };
 
-  const apiColumns = [
+  useEffect(() => {
+    fetchMenuInfo(menuId);
+    fetchBoundApis(menuId);
+  }, [menuId]);
+
+  const getPermissionLevelLabel = (level: number) => {
+    const levelMap = new Map([
+      [1, '公开'],
+      [2, '登录用户'],
+      [3, '管理员'],
+      [4, '超级管理员'],
+      [5, '自定义'],
+      [6, '不可调用'],
+      [7, '内部调用'],
+      [8, '第三方调用'],
+      [9, '其他'],
+      [10, '未知'],
+    ]);
+    return levelMap.get(level) || '未知';
+  };
+
+  const apiColumns: ProColumns<Api>[] = [
     {
       title: 'API 名称',
       dataIndex: 'name',
@@ -126,7 +140,8 @@ const BindApisPage = () => {
       dataIndex: 'permission_level',
       key: 'permission_level',
       search: false,
-      render: (level) => getPermissionLevelLabel(level),
+      render: (__, { permission_level }) =>
+        getPermissionLevelLabel(permission_level),
     },
   ];
 
@@ -142,34 +157,26 @@ const BindApisPage = () => {
           okText="是"
           cancelText="否"
         >
-          <Button type="link" danger>解绑</Button>
+          <Button type="link" danger>
+            解绑
+          </Button>
         </Popconfirm>
       ),
     },
   ];
 
-  const getPermissionLevelLabel = (level) => {
-    const levels = {
-      1: '公开',
-      2: '登录用户',
-      3: '管理员',
-      4: '超级管理员',
-      5: '自定义',
-      6: '不可调用',
-      7: '内部调用',
-      8: '第三方调用',
-      9: '其他',
-      10: '未知',
-    };
-    return levels[level] || '未知';
-  };
-
   return (
     <PageContainer>
       <Card title="菜单信息" bordered={false} style={{ marginBottom: 24 }}>
         <Row gutter={[16, 16]}>
-          <Col span={12}><strong>菜单名称: </strong>{menuInfo.name}</Col>
-          <Col span={12}><strong>描述: </strong>{menuInfo.description}</Col>
+          <Col span={12}>
+            <strong>菜单名称: </strong>
+            {menuInfo.name}
+          </Col>
+          <Col span={12}>
+            <strong>描述: </strong>
+            {menuInfo.description}
+          </Col>
         </Row>
       </Card>
       <Card title="已绑定的API" bordered={false} style={{ marginBottom: 24 }}>
@@ -202,7 +209,17 @@ const BindApisPage = () => {
             onChange: setSelectedApiKeys,
           }}
           toolBarRender={() => [
-            <Button key="bind" type="primary" onClick={() => setBoundApis(availableApis.filter(api => selectedApiKeys.includes(api.uuid)))}>
+            <Button
+              key="bind"
+              type="primary"
+              onClick={() =>
+                setBoundApis(
+                  availableApis.filter((api) =>
+                    selectedApiKeys.includes(api.uuid),
+                  ),
+                )
+              }
+            >
               添加到已绑定
             </Button>,
           ]}

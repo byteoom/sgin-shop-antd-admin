@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import { currencyApi } from '@/services';
+import { CurrencyData } from '@/services/types';
 import { Select, Spin, message } from 'antd';
-import { getCurrencyOptions } from '@/services/sys/currency';
+import { useEffect, useState } from 'react';
 
 const { Option } = Select;
 
 const CurrencySelect = ({ value, onChange }) => {
-  const [currencies, setCurrencies] = useState([]);
+  const [currencies, setCurrencies] = useState<CurrencyData[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchCurrencies = async () => {
       setLoading(true);
       try {
-        const response = await getCurrencyOptions();
+        const response = await currencyApi.getCurrencyOptions();
         if (response.code === 200) {
           setCurrencies(response.data);
         } else {
