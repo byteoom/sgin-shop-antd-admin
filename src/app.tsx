@@ -5,14 +5,15 @@ import { userService } from '@/services';
 import type { AxiosError, RequestConfig, RequestOptions } from '@umijs/max';
 import { history } from '@umijs/max';
 import Cookies from 'js-cookie';
+import { User } from './services/types';
 
 const loginPath = '/user/login';
 
 // 全局初始化数据配置，用于 Layout 用户信息和权限初始化
 // 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
 export async function getInitialState(): Promise<{
-  currentUser?: API.User;
-  fetchUserInfo?: () => Promise<API.User | undefined>;
+  currentUser?: User;
+  fetchUserInfo?: () => Promise<User | undefined>;
 }> {
   const fetchUserInfo = async () => {
     try {
@@ -50,7 +51,6 @@ export const layout = () => {
     footerRender: () => <Footer />,
   };
 };
-
 
 export const request: RequestConfig = {
   withCredentials: true,
