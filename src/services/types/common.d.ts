@@ -53,4 +53,9 @@ export type BaseListResult<T = any> = BaseResult<ListResult<T>>;
 export type O_UUID = string;
 //
 export type O_UUIDS = UUID[];
-export type O_IDS = UUID | UUIDS;
+// export type O_IDS = UUID | UUIDS;
+
+export type O_IDS = {
+  uuid?: string;
+  uuids?: string[];
+};

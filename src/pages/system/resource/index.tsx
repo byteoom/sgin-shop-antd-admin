@@ -1,9 +1,4 @@
-import {
-  createFolder,
-  createResource,
-  deleteResource,
-  getResourceList,
-} from '@/services/sys/resource';
+import { resourceApi } from '@/services';
 import {
   FileOutlined,
   FolderOutlined,
@@ -123,14 +118,22 @@ const FileManager = () => {
   const [previewImage, setPreviewImage] = useState('');
   const [fileType, setFileType] = useState('');
 
-  useEffect(() => {
-    fetchFiles();
-  }, [currentPath, fileType]);
+  const fetchFiles = async () => {
+    try {
+      const response = await resourceApi.getResourceList({
+        path: currentPath,
+        mime_type: fileType,
+      } as any);
+      setFiles(response.data.data);
+    } catch (error) {
+      message.error('Failed to load files');
+    }
+  };
 
   const handleDeleteFile = async (uuid) => {
     try {
-      const res = await deleteResource({ uuid });
-      if (res.code == 200) {
+      const res = await resourceApi.deleteResource({ uuid });
+      if (res.code === 200) {
         message.success('File deleted successfully');
         fetchFiles();
       } else {
@@ -141,22 +144,14 @@ const FileManager = () => {
     }
   };
 
-  const fetchFiles = async () => {
-    try {
-      const response = await getResourceList({
-        path: currentPath,
-        mime_type: fileType,
-      });
-      setFiles(response.data.data);
-    } catch (error) {
-      message.error('Failed to load files');
-    }
-  };
+  useEffect(() => {
+    fetchFiles();
+  }, [currentPath, fileType]);
 
   const handleCreateFolder = async () => {
     try {
       const values = await form.validateFields();
-      await createFolder({ name: values.name, path: currentPath });
+      await resourceApi.createFolder({ name: values.name, path: currentPath });
 
       fetchFiles();
       setIsModalVisible(false);
@@ -183,10 +178,10 @@ const FileManager = () => {
     formData.append('path', currentPath);
 
     try {
-      await createResource(formData);
+      await resourceApi.createResource(formData);
 
       fetchFiles();
-      
+
       onSuccess('OK');
       message.success('File uploaded successfully');
     } catch (error) {

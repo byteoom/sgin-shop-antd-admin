@@ -1,18 +1,28 @@
-import React, { useState, useRef } from 'react';
-import ProTable from '@ant-design/pro-table';
-import { Button, Modal, Form, Input, Switch, message, Tag, Popconfirm } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { getCurrencies, addCurrency, updateCurrency, deleteCurrency } from '@/services/sys/currency';
+import { currencyApi } from '@/services';
+import { CurrencyData } from '@/services/types';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
+import ProTable, { ProColumns } from '@ant-design/pro-table';
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Switch,
+  Tag,
+} from 'antd';
+import { useRef, useState } from 'react';
 
 const CurrencyManagement = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingCurrency, setEditingCurrency] = useState(null);
+  const [editingCurrency, setEditingCurrency] = useState<CurrencyData>();
   const [form] = Form.useForm();
   const actionRef = useRef();
 
   const handleAddCurrency = () => {
-    setEditingCurrency(null);
+    setEditingCurrency(undefined);
     form.resetFields();
     setIsModalVisible(true);
   };
@@ -25,7 +35,7 @@ const CurrencyManagement = () => {
 
   const handleDeleteCurrency = async (id) => {
     try {
-      await deleteCurrency({ uuid: id });
+      await currencyApi.deleteCurrency({ uuid: id });
       message.success('删除成功');
       actionRef.current?.reload();
     } catch (error) {
@@ -38,10 +48,10 @@ const CurrencyManagement = () => {
       const values = await form.validateFields();
       values.status = values.status ? 1 : 0;
       if (editingCurrency) {
-        await updateCurrency({ ...editingCurrency, ...values });
+        await currencyApi.updateCurrency({ ...editingCurrency, ...values });
         message.success('更新成功');
       } else {
-        await addCurrency(values);
+        await currencyApi.addCurrency(values);
         message.success('添加成功');
       }
       setIsModalVisible(false);
@@ -59,13 +69,19 @@ const CurrencyManagement = () => {
     <Tag color={status ? 'green' : 'red'}>{status ? '启用' : '未启用'}</Tag>
   );
 
-  const columns = [
+  const columns: ProColumns<CurrencyData>[] = [
     { title: 'ID', dataIndex: 'id', key: 'id', hideInSearch: true },
     { title: 'UUID', dataIndex: 'uuid', key: 'uuid' },
     { title: '名称', dataIndex: 'name', key: 'name' },
     { title: '代码', dataIndex: 'code', key: 'code', hideInSearch: true },
     { title: '符号', dataIndex: 'symbol', key: 'symbol', hideInSearch: true },
-    { title: '状态', dataIndex: 'status', key: 'status', hideInSearch: true, render: (status) => renderStatus(status) },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      hideInSearch: true,
+      render: (__, { status }) => renderStatus(status),
+    },
     {
       title: '操作',
       key: 'action',
@@ -92,7 +108,7 @@ const CurrencyManagement = () => {
 
   const fetchCurrencies = async (params) => {
     try {
-      const response = await getCurrencies(params);
+      const response = await currencyApi.getCurrencies(params);
       if (response.code !== 200) {
         return {
           data: [],

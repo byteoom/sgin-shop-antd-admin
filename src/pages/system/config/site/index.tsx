@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Form, Input, Button, message, Upload, Select } from 'antd';
+import { configApi, resourceApi } from '@/services';
 import { PlusOutlined } from '@ant-design/icons';
-import { getSiteConfig, updateSiteConfig } from '@/services/sys/site_config';
-import { createResource } from '@/services/sys/resource'; // This should be your service to handle image uploads
+import { Button, Card, Form, Input, message, Select, Upload } from 'antd';
+import { useEffect, useState } from 'react';
 
 const { Option } = Select;
 
@@ -16,14 +15,18 @@ const SiteConfigPage = () => {
     const fetchConfig = async () => {
       try {
         setLoading(true);
-        const response = await getSiteConfig();
+        const response = await configApi.getSiteConfig();
         if (response.code === 200) {
           form.setFieldsValue(response.data);
           if (response.data.site_logo) {
-            setLogoFileList([{ url: response.data.site_logo, name: 'logo', uid: '-1' }]);
+            setLogoFileList([
+              { url: response.data.site_logo, name: 'logo', uid: '-1' },
+            ]);
           }
           if (response.data.site_favicon) {
-            setFaviconFileList([{ url: response.data.site_favicon, name: 'favicon', uid: '-1' }]);
+            setFaviconFileList([
+              { url: response.data.site_favicon, name: 'favicon', uid: '-1' },
+            ]);
           }
         } else {
           message.error('加载站点配置失败');
@@ -42,7 +45,7 @@ const SiteConfigPage = () => {
     try {
       setLoading(true);
 
-      const response = await updateSiteConfig(values);
+      const response = await configApi.updateSiteConfig(values);
       if (response) {
         message.success('站点配置更新成功');
       } else {
@@ -56,20 +59,31 @@ const SiteConfigPage = () => {
   };
 
   const handleUploadChange = async ({ fileList, field }) => {
-    console.log("handleUploadChange:", fileList.length, field);
-    if (fileList.length > 0 ) {
-
+    console.log('handleUploadChange:', fileList.length, field);
+    if (fileList.length > 0) {
       const formData = new FormData();
       formData.append('files', fileList[0].originFileObj);
       formData.append('path', '/site');
 
-      const response = await createResource(formData);
-      if (response.code == 200 && response.data.length > 0) {
+      const response = await resourceApi.createResource(formData);
+      if (response.code === 200 && response.data.length > 0) {
         form.setFieldsValue({ [field]: '/public' + response.data[0].address });
         if (field === 'site_logo') {
-          setLogoFileList([{ url: '/public' + response.data[0].address, name: 'logo', uid: '-1' }]);
+          setLogoFileList([
+            {
+              url: '/public' + response.data[0].address,
+              name: 'logo',
+              uid: '-1',
+            },
+          ]);
         } else if (field === 'site_favicon') {
-          setFaviconFileList([{ url: '/public' + response.data[0].address, name: 'favicon', uid: '-1' }]);
+          setFaviconFileList([
+            {
+              url: '/public' + response.data[0].address,
+              name: 'favicon',
+              uid: '-1',
+            },
+          ]);
         }
       }
     }
@@ -84,7 +98,6 @@ const SiteConfigPage = () => {
       form.setFieldsValue({ site_favicon: '' });
     }
   };
-
 
   const uploadButton = (
     <div>
@@ -113,10 +126,18 @@ const SiteConfigPage = () => {
           site_language: 'zh', // Default language
         }}
       >
-        <Form.Item name="site_url" label="站点URL" rules={[{ required: true, message: '请输入站点URL' }]}>
+        <Form.Item
+          name="site_url"
+          label="站点URL"
+          rules={[{ required: true, message: '请输入站点URL' }]}
+        >
           <Input placeholder="请输入站点URL" />
         </Form.Item>
-        <Form.Item name="site_title" label="站点标题" rules={[{ required: true, message: '请输入站点标题' }]}>
+        <Form.Item
+          name="site_title"
+          label="站点标题"
+          rules={[{ required: true, message: '请输入站点标题' }]}
+        >
           <Input placeholder="请输入站点标题" />
         </Form.Item>
         <Form.Item name="site_sub_title" label="站点副标题">
@@ -142,11 +163,12 @@ const SiteConfigPage = () => {
             name="logo"
             listType="picture-card"
             fileList={logoFileList}
-            onChange={(info) => handleUploadChange({ ...info, field: 'site_logo' })}
+            onChange={(info) =>
+              handleUploadChange({ ...info, field: 'site_logo' })
+            }
             onRemove={() => handleRemove('site_logo')}
             customRequest={({ onSuccess }) => onSuccess('ok')}
             showUploadList={{ showRemoveIcon: true }}
-            
           >
             {logoFileList.length >= 1 ? null : uploadButton}
           </Upload>
@@ -156,7 +178,9 @@ const SiteConfigPage = () => {
             name="favicon"
             listType="picture-card"
             fileList={faviconFileList}
-            onChange={(info) => handleUploadChange({ ...info, field: 'site_favicon' })}
+            onChange={(info) =>
+              handleUploadChange({ ...info, field: 'site_favicon' })
+            }
             onRemove={() => handleRemove('site_favicon')}
             customRequest={({ onSuccess }) => onSuccess('ok')}
             showUploadList={{ showRemoveIcon: true }}

@@ -1,18 +1,15 @@
-import {
-  getPaymentMethodList,
-  updatePaymentMethodStatus,
-} from '@/services/sys/payment_method';
+import { paymentApi } from '@/services';
 import { EditOutlined, SettingOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
-import ProTable from '@ant-design/pro-table';
+import ProTable, { ProColumns } from '@ant-design/pro-table';
+import { history } from '@umijs/max';
 import { Button, message, Switch } from 'antd';
 import { useRef, useState } from 'react';
-import { history } from '@umijs/max';
 
 const PaymentMethodManagement = () => {
   const actionRef = useRef();
-  const [configModalVisible, setConfigModalVisible] = useState(false);
-  const [currentPaymentMethod, setCurrentPaymentMethod] = useState(null);
+  const [, setConfigModalVisible] = useState(false);
+  const [, setCurrentPaymentMethod] = useState<PaymentMethod>();
 
   const queryPaymentMethods = async (params, sort, filter) => {
     const queryParams = {
@@ -22,7 +19,7 @@ const PaymentMethodManagement = () => {
     };
 
     try {
-      const response = await getPaymentMethodList(queryParams);
+      const response = await paymentApi.getPaymentMethodList(queryParams);
       if (response.code !== 200) {
         return {
           data: [],
@@ -44,11 +41,10 @@ const PaymentMethodManagement = () => {
     }
   };
 
-
   const handleStatusChange = async (record) => {
     const newStatus = record.status === 1 ? 2 : 1; // 1: 启用, 2: 禁用
     try {
-      const res = await updatePaymentMethodStatus({
+      const res = await paymentApi.updatePaymentMethodStatus({
         uuid: record.uuid,
         status: newStatus,
       });
@@ -63,27 +59,22 @@ const PaymentMethodManagement = () => {
     }
   };
 
-  const handleEditConfig = (record) => {
-    if(record.code === 'paypal') {
-        history.push('/system/pay/payment-method/paypal');
-        return;
+  const handleEditConfig = (record: PaymentMethod) => {
+    if (record.code === 'paypal') {
+      history.push('/system/pay/edit');
+      return;
     }
     setCurrentPaymentMethod(record);
     setConfigModalVisible(true);
   };
 
-  const handleAddConfig = () => {
-    setCurrentPaymentMethod(null);
-    setConfigModalVisible(true);
-  };
-
-  const columns = [
+  const columns: ProColumns<PaymentMethod>[] = [
     {
       title: '图标',
       dataIndex: 'icon',
       key: 'icon',
       hideInSearch: true,
-      render: (icon) => (
+      render: (__, { icon }) => (
         <img src={icon} alt="icon" style={{ width: 40, height: 40 }} />
       ),
     },

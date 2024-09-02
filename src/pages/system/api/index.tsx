@@ -1,26 +1,36 @@
-import React, { useState, useRef } from 'react';
-import ProTable from '@ant-design/pro-table';
-import { Button, Modal, Form, Input, Switch, message, Tag, Popconfirm, Select } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
-import { getApis, addApi, updateApi, deleteApi } from '@/services/sys/api'; // 假设服务在该路径
-import { history } from '@umijs/max';
+import { apiApi } from '@/services'; // 假设服务在该路径
+import { Api, ApiListQueryParams } from '@/services/types';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
+import ProTable, { ActionType, ProColumns } from '@ant-design/pro-table';
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Select,
+  Switch,
+  Tag,
+} from 'antd';
+import { useRef, useState } from 'react';
 
 const { Option } = Select;
 
 const SysApiInfoManagement = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingApiInfo, setEditingApiInfo] = useState(null);
+  const [editingApiInfo, setEditingApiInfo] = useState<Api>();
   const [form] = Form.useForm();
-  const actionRef = useRef();
+  const actionRef = useRef<ActionType>();
 
   const handleAddApiInfo = () => {
-    setEditingApiInfo(null);
+    setEditingApiInfo(undefined);
     form.resetFields();
     setIsModalVisible(true);
   };
 
-  const handleEditApiInfo = (record) => {
+  const handleEditApiInfo = (record: Api) => {
     setEditingApiInfo(record);
     form.setFieldsValue({
       ...record,
@@ -29,9 +39,9 @@ const SysApiInfoManagement = () => {
     setIsModalVisible(true);
   };
 
-  const handleDeleteApiInfo = async (id) => {
+  const handleDeleteApiInfo = async (id: string) => {
     try {
-      await deleteApi({ uuid: id });
+      await apiApi.deleteApi({ uuid: id });
       message.success('删除成功');
       actionRef.current?.reload();
     } catch (error) {
@@ -44,10 +54,10 @@ const SysApiInfoManagement = () => {
       const values = await form.validateFields();
       values.status = values.status ? 1 : 0; // Converting switch boolean to status integer
       if (editingApiInfo) {
-        await updateApi({ ...editingApiInfo, ...values });
+        await apiApi.updateApi({ ...editingApiInfo, ...values });
         message.success('更新成功');
       } else {
-        await addApi(values);
+        await apiApi.addApi(values);
         message.success('添加成功');
       }
       setIsModalVisible(false);
@@ -61,28 +71,29 @@ const SysApiInfoManagement = () => {
     setIsModalVisible(false);
   };
 
-  const renderStatus = (status) => (
-    <Tag color={status === 1 ? 'green' : 'red'}>{status === 1 ? '启用' : '禁用'}</Tag>
+  const renderStatus = (status: number) => (
+    <Tag color={status === 1 ? 'green' : 'red'}>
+      {status === 1 ? '启用' : '禁用'}
+    </Tag>
   );
 
-  const renderPermissionLevel = (level) => {
-    const levels = {
-      1: '公开',
-      2: '登录用户',
-      3: '管理员',
-      4: '超级管理员',
-      5: '自定义',
-      6: '不可调用',
-      7: '内部调用',
-      8: '第三方调用',
-      9: '其他',
-      10: '未知',
-    };
-    return levels[level] || '未知';
+  const renderPermissionLevel = (level: number) => {
+    const levelMap = new Map([
+      [1, '公开'],
+      [2, '登录用户'],
+      [3, '管理员'],
+      [4, '超级管理员'],
+      [5, '自定义'],
+      [6, '不可调用'],
+      [7, '内部调用'],
+      [8, '第三方调用'],
+      [9, '其他'],
+      [10, '未知'],
+    ]);
+    return levelMap.get(level) || '未知';
   };
 
-
-  const columns = [
+  const columns: ProColumns<Api>[] = [
     { title: 'ID', dataIndex: 'id', key: 'id', hideInSearch: true },
     { title: 'UUID', dataIndex: 'uuid', key: 'uuid' },
     { title: '模块', dataIndex: 'module', key: 'module' },
@@ -93,16 +104,27 @@ const SysApiInfoManagement = () => {
       title: '权限等级',
       dataIndex: 'permission_level',
       key: 'permission_level',
-      render: (level) => renderPermissionLevel(level),
+      render: (__, { permission_level }) =>
+        renderPermissionLevel(permission_level),
     },
-    { title: '创建时间', dataIndex: 'created_at', key: 'created_at', hideInSearch: true },
-    { title: '更新时间', dataIndex: 'updated_at', key: 'updated_at', hideInSearch: true },
+    {
+      title: '创建时间',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      hideInSearch: true,
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'updated_at',
+      key: 'updated_at',
+      hideInSearch: true,
+    },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
       hideInSearch: true,
-      render: (status) => renderStatus(status),
+      render: (__, { status }) => renderStatus(status),
     },
     {
       title: '操作',
@@ -128,9 +150,9 @@ const SysApiInfoManagement = () => {
     },
   ];
 
-  const fetchApis = async (params) => {
+  const fetchApis = async (params: ApiListQueryParams) => {
     try {
-      const response = await getApis(params);
+      const response = await apiApi.getApis(params);
       if (response.code !== 200) {
         return {
           data: [],

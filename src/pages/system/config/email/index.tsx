@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Form, Input, Button, message } from 'antd';
-import { getEmailConfig, updateEmailConfig } from '@/services/sys/email_config';
+import { configApi } from '@/services';
+import { Button, Card, Form, Input, message } from 'antd';
+import { useEffect, useState } from 'react';
 
 const EmailConfigPage = () => {
   const [form] = Form.useForm();
@@ -10,8 +10,8 @@ const EmailConfigPage = () => {
     const fetchConfig = async () => {
       try {
         setLoading(true);
-        const response = await getEmailConfig();
-        if (response.code == 200) {
+        const response = await configApi.getEmailConfig();
+        if (response.code === 200) {
           form.setFieldsValue(response.data);
         } else {
           message.error('加载邮件配置失败');
@@ -30,7 +30,7 @@ const EmailConfigPage = () => {
     try {
       setLoading(true);
 
-      const response = await updateEmailConfig(values);
+      const response = await configApi.updateEmailConfig(values);
       if (response) {
         message.success('邮件配置更新成功');
       } else {
