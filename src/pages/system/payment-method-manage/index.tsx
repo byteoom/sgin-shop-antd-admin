@@ -65,7 +65,7 @@ const PaymentMethodManagement = () => {
 
   const handleEditConfig = (record) => {
     if(record.code === 'paypal') {
-        history.push('/system/payment_method/paypal');
+        history.push('/system/pay/payment-method/paypal');
         return;
     }
     setCurrentPaymentMethod(record);
