@@ -4,3 +4,4 @@ export * from './role';
 export * from './system';
 export * from './team';
 export * from './user';
+export * from './page';
