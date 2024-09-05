@@ -100,6 +100,12 @@ export default [
             hideInMenu: true,
           },
           {
+            name: '支付宝配置',
+            path: '/system/pay/alipay/edit',
+            component: './system/alipay/edit',
+            hideInMenu: true,
+          },
+          {
             name: 'paypal支付测试',
             path: '/system/pay/paypal-test',
             component: './system/paypal/test-pay',
