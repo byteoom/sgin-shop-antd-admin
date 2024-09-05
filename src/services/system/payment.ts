@@ -70,6 +70,17 @@ function requestPayPalPayment(data: any) {
   });
 }
 
+// 设置支付宝配置
+function updateAlipayConfig(data: any) {
+  return request('/api/v1/payment_method/alipay/config', {
+    method: 'POST',
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+}
+
 export const paymentApi = {
   getPaymentMethodList,
   createPaymentMethod,
@@ -78,4 +89,5 @@ export const paymentApi = {
   getPaymentMethodInfo,
   fetchPayPalClientId,
   requestPayPalPayment,
+  updateAlipayConfig,
 };
