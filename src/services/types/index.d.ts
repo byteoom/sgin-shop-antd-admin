@@ -24,3 +24,5 @@ export * from './menu';
 export * from './permission';
 // 资源
 export * from './resource';
+// 页面
+export * from './page';

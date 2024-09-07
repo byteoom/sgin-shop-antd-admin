@@ -80,6 +80,18 @@ export default [
     ],
   },
   {
+    name: '页面管理',
+    path: '/page',
+    icon: 'file',
+    routes: [
+      {
+        name: '页面列表',
+        path: '/page/list',
+        component: './page/list/index',
+      },
+    ],
+  },
+  {
     name: '系统管理',
     path: '/system',
     icon: 'setting',
