@@ -5,6 +5,7 @@ import ProTable, { ProColumns } from '@ant-design/pro-table';
 import { history } from '@umijs/max';
 import { Button, message, Switch } from 'antd';
 import { useRef, useState } from 'react';
+import { PaymentMethod } from '@/services/types';
 
 const PaymentMethodManagement = () => {
   const actionRef = useRef();
@@ -64,6 +65,12 @@ const PaymentMethodManagement = () => {
       history.push('/system/pay/edit');
       return;
     }
+
+    if (record.code === 'alipay') {
+      history.push('/system/pay/alipay/edit');
+      return;
+    }
+
     setCurrentPaymentMethod(record);
     setConfigModalVisible(true);
   };
