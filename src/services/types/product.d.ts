@@ -27,6 +27,7 @@ export interface Product extends ProductBase {
   stock_warning: number; // 产品警戒库存
   stock_warning_sell: boolean; // 低于警戒库存是否可售
   images: string; // 产品图片
+  image_list: string[]; // 产品图片
   videos: string; // 产品视频
   currency_code: string; // 货币代码
   created_at: string; // 创建时间
@@ -56,4 +57,27 @@ export interface ProductCategoryListQueryParams extends BaseQueryParams {
   end_time?: string; // 结束时间
   start_time?: string; // 开始时间
   name?: string; // 产品名称
+}
+// 产品变体
+
+export interface ProductVariantOption {
+  id: number;
+  uuid: string;
+  product_uuid: string;
+  product_variants_uuid: string;
+  name: string;
+  unit: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+export interface ProductVariant {
+  id: number;
+  uuid: string;
+  product_uuid: string;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  product_variants_options: ProductVariantOption[];
 }

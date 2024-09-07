@@ -1,9 +1,11 @@
 import QuillEditor from '@/components/QuillEditor';
-import { productServices, resourceApi } from '@/services';
+import { productServices } from '@/services';
+import getBase64, { FileType } from '@/utils/getBase64';
+import handleUpload from '@/utils/handleUpload';
 import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
-import type { GetProp, UploadFile, UploadProps } from 'antd';
+import type { UploadFile } from 'antd';
 import {
   Alert,
   Anchor,
@@ -29,11 +31,9 @@ import {
   VariantInformation,
 } from './components'; // Import the component
 
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
-
 const { Option } = Select;
 
-const anchorList = [
+export const anchorList = [
   { title: '产品信息', href: '#product-info', key: 'product-info' },
   { title: '上传产品图片', href: '#product-upload', key: 'product-upload' },
   { title: '产品详细信息', href: '#product-detail', key: 'product-detail' },
@@ -41,14 +41,6 @@ const anchorList = [
   { title: '产品管理', href: '#product-management', key: 'product-management' },
   { title: '产品运输', href: '#product-transport', key: 'product-transport' },
 ];
-
-const getBase64 = (file: FileType): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
 
 const ProductForm = () => {
   const [fileList, setFileList] = useState<UploadFile<any>[]>([]);
@@ -60,50 +52,11 @@ const ProductForm = () => {
   const [productType, setProductType] = useState('single');
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
 
-  const handleUpload = async () => {
-    const uploadedFiles: string[] = [];
-    const formData = new FormData();
-
-    if (fileList.length === 0) {
-      message.error('请上传产品图片');
-      return [];
-    }
-
-    // 将所有文件添加到 FormData 对象中
-    for (let file of fileList) {
-      formData.append('files', file.originFileObj as any); // 直接将文件添加到 FormData
-    }
-    formData.append('path', '/'); // 上传到 product 文件夹
-
-    // 调用 API 上传文件并获取资源 ID 列表
-    try {
-      const resource = await resourceApi.createResource(formData); // 假设 createResource 接收 FormData 对象
-
-      if (resource && Array.isArray(resource.data)) {
-        resource.data.forEach((res) => {
-          if (res.uuid) {
-            uploadedFiles.push(res.uuid);
-          } else {
-            message.error(`上传文件失败，资源 ID 缺失`);
-          }
-        });
-      } else {
-        message.error(`上传文件失败`);
-        return [];
-      }
-    } catch (error) {
-      message.error(`文件上传过程中出现错误`);
-      return [];
-    }
-
-    return uploadedFiles;
-  };
-
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
 
-      const uploadedFileIds = await handleUpload();
+      const uploadedFileIds = await handleUpload(fileList);
 
       if (uploadedFileIds.length === 0) {
         return;
@@ -137,7 +90,7 @@ const ProductForm = () => {
 
       if (result.code === 200) {
         message.success('产品创建成功！');
-        history.push('/product/manager');
+        history.push('/product/list');
       } else {
         message.error(result.message);
       }
