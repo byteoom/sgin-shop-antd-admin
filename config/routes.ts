@@ -38,6 +38,18 @@ export default [
         // hideInMenu: true,
       },
       {
+        name: '商品编辑',
+        path: '/product/edit/:uuid',
+        component: './product/edit',
+        hideInMenu: true,
+      },
+      {
+        name: '商品详情',
+        path: '/product/detail/:uuid',
+        component: './product/detail',
+        hideInMenu: true,
+      },
+      {
         name: '商品列表',
         path: '/product/list',
         component: './product/list',
